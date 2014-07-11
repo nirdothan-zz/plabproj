@@ -1,5 +1,19 @@
+/* max number of rows of program segment*/
+#define MAX_PC 2000 
+
+/* the size of a word in bits */
+#define WORD_BITS 20
+
+/* 
+storage for 20 bit words - with 4 excess bits
+we will use the 20 LSBs
+*/
 typedef char Word_t[3];
 
+/* 
+bit fileds helper struct to assit with bit manipulation
+
+*/
 typedef struct {
 		unsigned char comb : 2;
 		unsigned char target_reg : 3;	/* 3-5 */

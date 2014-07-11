@@ -30,6 +30,9 @@
     <ClCompile Include="flow_controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bitwise_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assemblerTypes.h">
