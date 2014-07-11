@@ -65,7 +65,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="file_utils.c" />
+    <ClCompile Include="flow_controller.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="ref_tables.c" />
+    <ClCompile Include="row_analyzer.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="assemblerTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
