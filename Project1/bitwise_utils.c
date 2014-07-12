@@ -16,32 +16,19 @@ void print20LSBs( const void *bitStream)
 	printf("\n");
 }
 
-void mapword(Word_t word, int num)
+void printHEX(const Word_t row)
 {
-	int i, mask = 1;
-
-	word[0] = 0;
-	word[1] = 0;
-	word[2] = 0;
-	for (i = 0; i < 8; i++)
-	{
-		word[0] |= (num & mask);
-		mask <<= 1;
-	}
+	unsigned int  maskMSB = 0xf, mask = 0xff;
 	
+	printf("%X %X %X \n", (row[2] & maskMSB), row[1] & mask , row[0] & mask );
 	
-	for (i = 0; i < 8; i++)
-	{
-		word[1] |= (num & mask);
-		mask <<= 1;
-	}
 
+}
 
+void mapword(Word_t target, const int src)
+{
+	target[0] = (src & 0xff);
+	target[1] = (src>>8 & 0xff);
+	target[2] = (src>>16 & 0x3f);
 	
-	for (i = 0; i < 8; i++)
-	{
-		word[2] |= (num & mask);
-		mask <<= 1;
-	}
-
 }

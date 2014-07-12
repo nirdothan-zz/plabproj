@@ -38,5 +38,8 @@
     <ClInclude Include="assemblerTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ref_tables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

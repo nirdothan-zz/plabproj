@@ -26,3 +26,9 @@ typedef struct {
 		unsigned char : 2;
 	
 } Fields_t;
+
+typedef struct opcodes {
+	char opcode[4];
+	int decimal;
+	int octal;
+} Opcodes_t;
