@@ -32,3 +32,5 @@ typedef struct opcodes {
 	int decimal;
 	int octal;
 } Opcodes_t;
+
+#define INP_SUFFIX ".asm"
