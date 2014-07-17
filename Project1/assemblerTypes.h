@@ -10,6 +10,13 @@ we will use the 20 LSBs
 */
 typedef char Word_t[3];
 
+/* struct for symbol table*/
+typedef struct {
+	char label[31];
+	int decimal;
+	int octal;
+} Symbol_t;
+
 /* 
 bit fileds helper struct to assit with bit manipulation
 
@@ -43,3 +50,5 @@ enum { NORMAL, END, WARNING, ERROR, FATAL };
 
 #define MSG_MAX_SIZE 100
 #define COMMENT_CHAR ';'
+#define MAX_SYMBOLS 2000
+#define INIT_PC 100

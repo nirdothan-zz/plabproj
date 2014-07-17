@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include "assemblerTypes.h"
 
+extern Symbol_t *g_symbolTable;
+extern int g_symbolTableSize;
+extern int g_PC;
+
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
 	char dummy[MSG_MAX_SIZE];
@@ -55,8 +59,14 @@ int parseLabel(const char **row){
 				
 
 
-		/* TODO store label*/
-		printf("label is <%s>\n", label);
+		/* write label to symbol table */
+		strcpy((g_symbolTable[g_symbolTableSize].label), label);
+		g_symbolTable[g_symbolTableSize].decimal = g_PC;
+		g_symbolTableSize++;
+
+
+		//printf("label is <%s>\n", g_symbolTable[g_symbolTableSize-1].label);
+
 
 		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
 		(*row) += labelLength + 1;

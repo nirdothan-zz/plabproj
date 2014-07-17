@@ -2,13 +2,23 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-Word_t programSegment[MAX_PC];
+Word_t g_programSegment[MAX_PC];	/* global Program Segment */
+int g_PC = INIT_PC;				/* program count */
+Symbol_t *g_symbolTable;			/* global symbol table */
+int g_symbolTableSize=0;			/* symbol table current size */
+
 
 
 int firstPass(char *inputFile){
 	int status;
 	char *row;
+
+	g_symbolTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
+	if (!g_symbolTable)
+		return reportError("Fatal! Unable to allocate memory\n", FATAL);
+
 
 	/* open input file for reading*/
 	if (ERROR == initForFile(inputFile))
@@ -26,6 +36,14 @@ int firstPass(char *inputFile){
 
 
 
+}
+
+int secondPass()
+{
+
+
+
+	free(g_symbolTable);
 }
 
 int dummytests(){
