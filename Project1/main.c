@@ -4,18 +4,20 @@
 
 void processSingleFile(char *inputFile)
 {
-	//printf("file: %s\n", inputFile);
-	initFiles(inputFile);
+	printf("file: %s\n", inputFile);
+	firstPass(inputFile);
 }
 
 void main(int argc, char **argv)
 {
 	int i;
+	initPrgram("assembler");
 
-	
-
+	//parseRow("123456789012345678901234567890:i'm nir");
+	//return;
 	for (i = 1; i < argc; i++){
-		printf("argv[%d]=%s\n", i,argv[i]);
+		//printf("argv[%d]=%s\n", i,argv[i]);
+
 		processSingleFile(argv[i]);
 	}
 	//printf(" opcode %d\n", getDecOpcode("jms"));

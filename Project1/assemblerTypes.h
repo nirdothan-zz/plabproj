@@ -34,3 +34,12 @@ typedef struct opcodes {
 } Opcodes_t;
 
 #define INP_SUFFIX ".asm"
+#define EXT_SUFFIX ".ext"
+#define OBJ_SUFFIX ".obj"
+#define ENT_SUFFIX ".ent"
+#define MAX_LABEL_SIZE 30
+
+enum { NORMAL, END, WARNING, ERROR, FATAL };
+
+#define MSG_MAX_SIZE 100
+#define COMMENT_CHAR ';'

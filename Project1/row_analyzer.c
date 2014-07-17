@@ -1,22 +1,79 @@
 #include<string.h>
 #include <stdio.h>
+#include "assemblerTypes.h"
 
-int parseRow(char *ro){
+/* check if the row string represents a comment or an empty line */
+int isCommentOrEmpty(const char *row){
+	char dummy[MSG_MAX_SIZE];
+	/* if sscanf returned 0 then all chars were white spaces */
+	return (( COMMENT_CHAR == row[0] )|| (!sscanf(row,"%s", dummy)));
 
-	char  *row = "a:b:c";
-	char *del= ":";
-	char label[20], rest[20];
-	char *pStr = (char*)malloc(100);
+}
+
+/* check that chars are valid ofr label i.e. alphanumeric*/
+int isValidLabelChar(const char c){
+	return ((c >= 'A' && c < 'z') || (c >= '0' && c <= '9'));
+}
 
 
-	//ret = strrchr(row, 'a');
-	pStr = strtok(row,":");
+/*
+ parse the possible label part of the row
+ the pointer is moved to after the label if exists 
+*/
+int parseLabel(const char **row){
+	const int labelIndication = ':';
+	int labelLength, i;
+	char *label[MAX_LABEL_SIZE + 1], *pl = label, *end;
 
+	/* find if this row begins with a label*/
+	end = strchr(*row, labelIndication);
+
+	/* no label in string */
+	if (!end)
+		return NORMAL;
+
+	/* length of label must be under MAX_LABEL_SIZE =30 */
+	if ((labelLength = (end - *row)) > MAX_LABEL_SIZE){
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! illegal label length =%d\n", labelLength);
+		return reportError(msg,ERROR);
+	}
+
+	/* copy label chars to label array, only if they're legal */
+	for (i = 0; i < labelLength; i++)
+		if (isValidLabelChar((*row)[i]))
+			*pl++ = (*row)[i];
+		else{
+
+			char msg[MSG_MAX_SIZE];
+			sprintf(msg, "Error! illegal label character %c\n", ((*row)[i]));
+			return reportError(msg, ERROR);
+
+		}
+		
+		*pl = 0;
+				
+
+
+		/* TODO store label*/
+		printf("label is <%s>\n", label);
+
+		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
+		(*row) += labelLength + 1;
+
+		return NORMAL;
+
+
+}
+
+int parseRow(const char *row){
+
+	printf("row is <%s>\n", row);
+
+	if (isCommentOrEmpty(row))
+		return NORMAL;
+	parseLabel(&row);
+
+	return NORMAL;
 	
-
-	if (pStr)
-		printf("label=%s\n\n", pStr);
-	else
-		printf("is null\n");
-	return 0;
 }

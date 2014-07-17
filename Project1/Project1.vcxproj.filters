@@ -33,6 +33,9 @@
     <ClCompile Include="bitwise_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="error_handler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assemblerTypes.h">

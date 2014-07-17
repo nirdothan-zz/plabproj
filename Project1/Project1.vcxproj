@@ -68,6 +68,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bitwise_utils.c" />
+    <ClCompile Include="error_handler.c" />
     <ClCompile Include="file_utils.c" />
     <ClCompile Include="flow_controller.c" />
     <ClCompile Include="main.c" />
