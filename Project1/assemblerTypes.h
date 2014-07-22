@@ -15,6 +15,7 @@ typedef struct {
 	char label[31];
 	int decimal;
 	int octal;
+	int type;
 } Symbol_t;
 
 /* 
@@ -46,9 +47,14 @@ typedef struct opcodes {
 #define ENT_SUFFIX ".ent"
 #define MAX_LABEL_SIZE 30
 
-enum { NORMAL, END, WARNING, ERROR, FATAL };
+enum { NORMAL=0, END, WARNING, ERROR, FATAL };
 
 #define MSG_MAX_SIZE 100
 #define COMMENT_CHAR ';'
 #define MAX_SYMBOLS 2000
-#define INIT_PC 100
+#define INIT_IC 100
+#define INIT_DC 0
+#define DATA_INSTRUCTION ".data"
+#define STRING_INSTRUCTION ".string"
+
+enum {DATA_LABEL, OPR_LABEL  };

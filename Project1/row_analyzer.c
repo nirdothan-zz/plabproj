@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include "assemblerTypes.h"
 
-extern Symbol_t *g_symbolTable;
-extern int g_symbolTableSize;
-extern int g_PC;
+
+
+int isCommentOrEmpty(const char*);
+int isValidLabelChar(const char);
 
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
@@ -24,11 +25,14 @@ int isValidLabelChar(const char c){
  parse the possible label part of the row
  the pointer is moved to after the label if exists 
 */
-int parseLabel(const char **row){
+int parseLabel(const char **row, char *o_labelFlag, char *o_label){
+
+
 	const int labelIndication = ':';
 	int labelLength, i;
-	char *label[MAX_LABEL_SIZE + 1], *pl = label, *end;
+	char label[MAX_LABEL_SIZE + 1], *pl = label, *end;
 
+	*o_labelFlag = 0;
 	/* find if this row begins with a label*/
 	end = strchr(*row, labelIndication);
 
@@ -57,33 +61,66 @@ int parseLabel(const char **row){
 		
 		*pl = 0;
 				
+		strcpy(o_label, label);
+		
+		(*o_labelFlag) = 1;
+		
+		///* write label to symbol table */
+		//if (g_symbolTableSize <= MAX_SYMBOLS){
+		//	strcpy((g_symbolTable[g_symbolTableSize].label), label);
+		//	g_symbolTable[g_symbolTableSize].decimal = g_DC;
+		//	g_symbolTableSize++;
+		//}
+		//else {
+		//	return reportError("Error! Maximum # of labels exceeded\n",ERROR);
+		//}
 
 
-		/* write label to symbol table */
-		strcpy((g_symbolTable[g_symbolTableSize].label), label);
-		g_symbolTable[g_symbolTableSize].decimal = g_PC;
-		g_symbolTableSize++;
-
-
-		//printf("label is <%s>\n", g_symbolTable[g_symbolTableSize-1].label);
-
+		
 
 		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
 		(*row) += labelLength + 1;
 
 		return NORMAL;
-
-
 }
 
-int parseRow(const char *row){
-
-	printf("row is <%s>\n", row);
-
-	if (isCommentOrEmpty(row))
-		return NORMAL;
-	parseLabel(&row);
-
-	return NORMAL;
+/*
+parse the possible data instruction part of the row
+the pointer is moved to after the instruction if exists
+*/
+int parseInstruction(const char **row, char *isDataFlag){
 	
+	int status;
+	char instruction[MAX_LABEL_SIZE];
+	status = sscanf(*row, "%s", instruction);
+
+	if (!status)
+		return reportError("Error! Illegal or missing instruction\n", ERROR);
+
+	/* is a data instruction */
+	if ('.' == instruction[0]){
+		/* set a flag to let the calling function know that it is a data instruction*/
+		*isDataFlag = 1;
+		if (!strcmp(instruction, DATA_INSTRUCTION))
+		{
+			printf("data instrcution\n");
+		}
+		else if (!strcmp(instruction, STRING_INSTRUCTION))
+		{
+			printf("string instrcution\n");
+		}
+		else {
+			reportError("Error!unknown data instruction\n",ERROR);
+		}
+	}
+	else {
+		printf("NOT data instrcution\n");
+	}
+	
+
+
+		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
+	//	(*row) += labelLength + 1;
+
+		return NORMAL;
 }

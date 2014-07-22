@@ -32,3 +32,23 @@ void mapword(Word_t target, const int src)
 	target[2] = (src>>16 & 0x3f);
 	
 }
+
+/*
+	return the octal value for a given decimal
+*/
+int getOctal(int decimal){
+	int oct=0;
+	int resid=0, whole=0, tens=1;
+	whole = decimal;
+
+	while (whole > 0) {
+		resid = whole % 8;
+		oct = oct+(tens * resid);
+		whole = whole / 8;
+		tens *= 10;
+	}
+
+	return oct;
+}
+
+

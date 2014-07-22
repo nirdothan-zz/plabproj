@@ -13,8 +13,8 @@ void main(int argc, char **argv)
 	int i;
 	initPrgram("assembler");
 
-	//parseRow("123456789012345678901234567890:i'm nir");
-	//return;
+
+//	return;
 	for (i = 1; i < argc; i++){
 		//printf("argv[%d]=%s\n", i,argv[i]);
 
