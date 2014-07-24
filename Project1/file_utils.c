@@ -53,7 +53,7 @@ int readLine(char **line){
 		return END;
 	
 	/* remove \n at end of line and make sure no string functions use that char*/
-	(*line)[strlen(*line) - 1] = 0;
+	/*  (*line)[strlen(*line) - 1] = 0; */
 	/* increment line count in error handler */
 	incrementLine();
 	return NORMAL;																				

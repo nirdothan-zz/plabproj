@@ -9,6 +9,7 @@ depicted in page 28 of the course booklet
 #include <stdlib.h>
 
 Word_t g_programSegment[MAX_PC];	/* global Program Segment */
+Word_t g_dataSegment[MAX_PC];		/* global Data Segment */
 int g_IC = INIT_IC;					/* global instructions counter */
 int g_DC = INIT_DC;					/* global data counter */
 Symbol_t *g_symbolTable;			/* global symbol table */
@@ -107,6 +108,10 @@ int parseRowFirst(const char *row){
 	/* 	step #6 on p 28 */
 	if (labelFlag && isDatainstructionFlag) {
 		
+		/* make sure no memory overflow */
+		if (MAX_SYMBOLS==g_symbolTableSize)
+			return reportError("Error! Maximum # of labels exceeded\n",FATAL);
+			
 		strcpy((g_symbolTable[g_symbolTableSize]).label, label);
 		(g_symbolTable[g_symbolTableSize]).decimal = g_DC;
 		(g_symbolTable[g_symbolTableSize]).octal = getOctal(g_DC);

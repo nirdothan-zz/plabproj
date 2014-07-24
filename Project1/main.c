@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include "assemblerTypes.h"
-
+#include <string.h>
 
 void processSingleFile(char *inputFile)
 {
@@ -13,6 +13,7 @@ void main(int argc, char **argv)
 	int i;
 	initPrgram("assembler");
 
+	
 
 //	return;
 	for (i = 1; i < argc; i++){

@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include "assemblerTypes.h"
 
+extern Word_t g_dataSegment;
+extern int g_DC;
 
 
 int isCommentOrEmpty(const char*);
 int isValidLabelChar(const char);
+int storeString(const char *);
+int storeData(const char *);
 
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
@@ -63,20 +67,8 @@ int parseLabel(const char **row, char *o_labelFlag, char *o_label){
 				
 		strcpy(o_label, label);
 		
+		/* set label flag on */
 		(*o_labelFlag) = 1;
-		
-		///* write label to symbol table */
-		//if (g_symbolTableSize <= MAX_SYMBOLS){
-		//	strcpy((g_symbolTable[g_symbolTableSize].label), label);
-		//	g_symbolTable[g_symbolTableSize].decimal = g_DC;
-		//	g_symbolTableSize++;
-		//}
-		//else {
-		//	return reportError("Error! Maximum # of labels exceeded\n",ERROR);
-		//}
-
-
-		
 
 		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
 		(*row) += labelLength + 1;
@@ -92,35 +84,70 @@ int parseInstruction(const char **row, char *isDataFlag){
 	
 	int status;
 	char instruction[MAX_LABEL_SIZE];
+	char instructionPrefix = '.';
 	status = sscanf(*row, "%s", instruction);
 
 	if (!status)
 		return reportError("Error! Illegal or missing instruction\n", ERROR);
 
 	/* is a data instruction */
-	if ('.' == instruction[0]){
+	if (instructionPrefix == instruction[0]){
 		/* set a flag to let the calling function know that it is a data instruction*/
 		*isDataFlag = 1;
+		
+		/* advance pointer to the '.' char */
+		(*row) = strchr(*row, instructionPrefix);
+
+		/* is a data instruction */
 		if (!strcmp(instruction, DATA_INSTRUCTION))
 		{
-			printf("data instrcution\n");
+			/* advance pointer to after the ".data" string */
+			(*row) += strlen(DATA_INSTRUCTION);
+			return storeData(*row);
 		}
+		/* is a string instruction */
 		else if (!strcmp(instruction, STRING_INSTRUCTION))
 		{
-			printf("string instrcution\n");
+			/* advance pointer to after the ".string" string */
+		  (*row) += strlen(STRING_INSTRUCTION);
+		
+		  return storeString(*row);
 		}
+
+		/* it begins with a '.' but is neither .string nor .data */
 		else {
 			reportError("Error!unknown data instruction\n",ERROR);
 		}
 	}
+
+	/* not a data instruction */
 	else {
 		printf("NOT data instrcution\n");
 	}
 	
 
 
-		/* move the pointer till after the label, so that the calling program can processs the rest of the row */
-	//	(*row) += labelLength + 1;
 
 		return NORMAL;
+}
+
+
+int storeData(char *data){
+	int integer;
+	Word_t word;
+	if (sscanf(data, "%d", &integer) != 1){
+		return reportError("Error! Ilegal data value\n",ERROR);
+	}
+
+	/* store the integer that followed ".data" in a new row in the global data segment */
+	/* data segment rows are 20 bits long, and require mapping from int */
+	mapword(&(g_dataSegment[g_DC]), integer);
+	/* increment data dounter */
+	g_DC++;
+
+}
+
+
+int storeString(char *data){
+
 }
