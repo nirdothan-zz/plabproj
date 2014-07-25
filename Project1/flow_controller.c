@@ -14,17 +14,24 @@ int g_IC = INIT_IC;					/* global instructions counter */
 int g_DC = INIT_DC;					/* global data counter */
 Symbol_t *g_symbolTable;			/* global symbol table */
 int g_symbolTableSize=0;			/* global symbol table current size */
+Symbol_t *g_externalSymbolTable;			/* global symbol table */
+int g_externalSymbolTableSize = 0;			/* global symbol table current size */
 static char labelFlag = 0;			/* module level label idenfification flag */
-static char isDatainstructionFlag = 0;	/* module level data instruction idenfification flag */
+
 
 int parseRowFirst(const char *);
+int insertLabel(char *, int);
 
 int firstPass(char *inputFile){
 	int status;
-	char *row;
+	char *row=NULL;
 
 	g_symbolTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
 	if (!g_symbolTable)
+		return reportError("Fatal! Unable to allocate memory\n", FATAL);
+
+	g_externalSymbolTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
+	if (!g_externalSymbolTable)
 		return reportError("Fatal! Unable to allocate memory\n", FATAL);
 
 
@@ -54,6 +61,7 @@ int secondPass()
 
 
 	free(g_symbolTable);
+	free(g_externalSymbolTable);
 }
 
 int dummytests(){
@@ -76,7 +84,7 @@ int dummytests(){
 	print20LSBs(w);
 	print20LSBs(&a);
 	printHEX(w);
-	printf("%d");
+
 
 }
 
@@ -84,6 +92,8 @@ int dummytests(){
 int parseRowFirst(const char *row){
 	int status;
 	char label[MAX_LABEL_SIZE + 1];
+	int instructionFlag = 0;	 /*  instruction idenfification flag */
+
 	printf("row is <%s>\n", row);
 
 	if (isCommentOrEmpty(row))
@@ -99,27 +109,63 @@ int parseRowFirst(const char *row){
 
 
 	/*
-	step #5 on p 28
-	if data instruction is found the isDatainstructionFlag is set to 1
+	step #5 and #8 on p 28
+	if data instruction is found the instructionFlag is set per enum
 	*/
-	if ((status = parseInstruction(&row, &isDatainstructionFlag)) != NORMAL )
+	if ((status = parseInstruction(&row, &instructionFlag)) != NORMAL)
 		return status;
 
-	/* 	step #6 on p 28 */
-	if (labelFlag && isDatainstructionFlag) {
-		
-		/* make sure no memory overflow */
-		if (MAX_SYMBOLS==g_symbolTableSize)
-			return reportError("Error! Maximum # of labels exceeded\n",FATAL);
-			
-		strcpy((g_symbolTable[g_symbolTableSize]).label, label);
-		(g_symbolTable[g_symbolTableSize]).decimal = g_DC;
-		(g_symbolTable[g_symbolTableSize]).octal = getOctal(g_DC);
-		(g_symbolTable[g_symbolTableSize]).type = DATA_LABEL;
-		g_symbolTableSize++;
 
-	}
+
+	/* 	step #6 on p 28 */
+	if (labelFlag && 
+		( DATA_INSTRUCTION_FLAG == instructionFlag ||
+		  STRING_INSTRUCTION_FLAG == instructionFlag))
+			return insertLabel(label, DATA_LABEL);
+
+	/* 	step #9 on p 28 */
+	if (EXTERN_INSTRUCTION_FLAG == instructionFlag)
+		return insertExtrenalLabel(row);
+
+	
 
 	return NORMAL;
 
+}
+
+
+/* insert a label into the label table */
+int insertLabel(char *label, int type)
+{
+	/* make sure no memory overflow */
+	if (MAX_SYMBOLS == g_symbolTableSize)
+		return reportError("Error! Maximum # of labels exceeded\n", FATAL);
+
+	strcpy((g_symbolTable[g_symbolTableSize]).label, label);
+	(g_symbolTable[g_symbolTableSize]).decimal = g_DC;
+	(g_symbolTable[g_symbolTableSize]).octal = getOctal(g_DC);
+	(g_symbolTable[g_symbolTableSize]).type = type;
+	g_symbolTableSize++;
+
+	return NORMAL;
+}
+
+
+/* insert an external label into the the external label table, with 0 address */
+insertExtrenalLabel(char *row)
+{
+	char label[MAX_LABEL_SIZE + 1];
+	/* make sure no memory overflow */
+	if (MAX_SYMBOLS == g_externalSymbolTableSize)
+		return reportError("Fatal! Maximum # of Extrenal labels exceeded\n", FATAL);
+	if (sscanf(row, "%s",label) != 1 )
+		return  reportError("Error! Illegal external instruction\n", ERROR);
+
+	strcpy((g_externalSymbolTable[g_externalSymbolTableSize]).label, label);
+	(g_externalSymbolTable[g_externalSymbolTableSize]).decimal = 0; /*init*/
+	(g_externalSymbolTable[g_externalSymbolTableSize]).octal = 0; /*init*/
+	(g_externalSymbolTable[g_externalSymbolTableSize]).type = EXT_LABEL;
+	g_externalSymbolTableSize++;
+
+	return NORMAL;
 }

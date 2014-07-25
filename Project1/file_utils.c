@@ -35,11 +35,11 @@ Calling function must free memory after use
 */
 int readLine(char **line){
 	int status;
-	*line = (char*)malloc(MSG_MAX_SIZE);
+	*line = (char*)malloc(MAX_ROW_SIZE+1);
 	if (!(*line))
 		return reportError("Fatal! Unable to allocate memory\n", FATAL);
 
-	status=fgets(*line, MSG_MAX_SIZE, ifd);
+	status = fgets(*line, MAX_ROW_SIZE, ifd);
 
 	/*if (!status){
 		char msg[MSG_MAX_SIZE];

@@ -46,7 +46,9 @@ typedef struct opcodes {
 #define OBJ_SUFFIX ".obj"
 #define ENT_SUFFIX ".ent"
 #define MAX_LABEL_SIZE 30
+#define MAX_ROW_SIZE 80
 
+/*statuses used as return value */
 enum { NORMAL=0, END, WARNING, ERROR, FATAL };
 
 #define MSG_MAX_SIZE 100
@@ -56,5 +58,11 @@ enum { NORMAL=0, END, WARNING, ERROR, FATAL };
 #define INIT_DC 0
 #define DATA_INSTRUCTION ".data"
 #define STRING_INSTRUCTION ".string"
+#define EXTERN_INSTRUCTION ".extern"
+#define ENTRY_INSTRUCTION ".entry"
 
-enum {DATA_LABEL, OPR_LABEL  };
+
+enum {DATA_LABEL, OPR_LABEL, EXT_LABEL  };
+
+/*indicates instuction types identified*/
+enum { NO_INST_FLAG = 0, DATA_INSTRUCTION_FLAG, STRING_INSTRUCTION_FLAG, EXTERN_INSTRUCTION_FLAG, ENTRY_INSTRUCTION_FLAG };
