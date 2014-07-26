@@ -1,7 +1,6 @@
 #include <string.h>
 #include "ref_tables.h"
 
-#define KNF -1
 
 /* generic macro to lookup values in reference tables */
 /* params:
@@ -28,6 +27,10 @@
 	}\
 }								
 
+void trimSlash(char *, char *);
+int  getOpcodeGroup(char *);
+int  getDecOpcode(char *op);
+
 
 /*returns the octal mapping of a given opcode*/
 int  getOctOpcode(char *op){
@@ -42,4 +45,31 @@ int  getDecOpcode(char *op){
 	int res;
 	FINDINREF(opcodes, Opcodes_t, opcode, op, decimal, res);
 	return res;
+}
+
+/*returns the group mapping of a given opcode*/
+int  getOpcodeGroup(char *op){
+	int res, trimsize;
+	char trimmedOp[MAX_ROW_SIZE];
+
+	trimSlash(trimmedOp,op);
+	
+	FINDINREF(opcodes, Opcodes_t, opcode, trimmedOp, group, res);
+	return res;
+}
+
+void trimSlash(char *dst, char *src){
+	int  trimsize;
+	char  *p;
+
+	p = strchr(src, '/');
+
+	if (p)
+		trimsize = (p - src);
+	else
+		trimsize = sizeof(src);
+
+	strncpy(dst, src, trimsize);
+	dst[trimsize] = '\0';
+
 }

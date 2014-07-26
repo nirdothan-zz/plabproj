@@ -39,11 +39,14 @@ typedef struct opcodes {
 	char opcode[4];
 	int decimal;
 	int octal;
+	int group; /*BINARY, UNARY, NOPARAMS*/
 } Opcodes_t;
 
-#define INP_SUFFIX ".asm"
+enum { BINARY, UNARY, NOPARAMS }; /* for operation type */
+
+#define INP_SUFFIX ".as"
 #define EXT_SUFFIX ".ext"
-#define OBJ_SUFFIX ".obj"
+#define OBJ_SUFFIX ".ob"
 #define ENT_SUFFIX ".ent"
 #define MAX_LABEL_SIZE 30
 #define MAX_ROW_SIZE 80
@@ -60,7 +63,7 @@ enum { NORMAL=0, END, WARNING, ERROR, FATAL };
 #define STRING_INSTRUCTION ".string"
 #define EXTERN_INSTRUCTION ".extern"
 #define ENTRY_INSTRUCTION ".entry"
-
+#define KNF -1 /*Key Not Found value for referece tables*/
 
 enum {DATA_LABEL, CODE_LABEL, EXT_LABEL  };
 

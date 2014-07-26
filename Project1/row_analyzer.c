@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include "assemblerTypes.h"
 
+
 extern Word_t g_dataSegment;
 extern int g_DC;
+extern int g_IC;
 
 
 int isCommentOrEmpty(const char*);
@@ -137,9 +139,8 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 			
 		/* it begins with a '.' but is neither .string nor .data, .entry, .extern */
 		else {
-			if (-1 == getDecOpcode(instruction))
-				return reportError("Error!, illegal operation code\n",ERROR);
-
+			
+			return reportError("Error!, illegal instruction\n", ERROR);
 
 		}
 	}
@@ -147,7 +148,26 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 	/*TODO remove */
 	/* not a data instruction */
 	else {
-		printf("NOT data instrcution\n");
+		
+		(*row) = strchr(*row, '/');
+		if (!(*row))
+			return reportError("Error!, illegal syntax, could not find '/' after opcode \n", ERROR);
+
+
+
+		/* calculate the size of the instruction */
+		switch (getOpcodeGroup(instruction)){
+		case KNF:
+			return reportError("Error!, illegal operation code\n", ERROR);
+			break;
+		case UNARY:
+			break;
+		case BINARY:
+			break;
+		case NOPARAMS:
+			g_IC++;
+			break;
+		}
 	}
 	
 
