@@ -80,7 +80,7 @@ int parseLabel(const char **row, char *o_labelFlag, char *o_label){
 parse the possible data instruction part of the row
 the pointer is moved to after the instruction if exists
 */ 
-int parseInstruction(const char **row, int  *o_labelFlag){
+int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 	
 	int status;
 	char instruction[MAX_LABEL_SIZE];
@@ -101,7 +101,7 @@ int parseInstruction(const char **row, int  *o_labelFlag){
 		
 		/* advance pointer to the '.' char */
 		(*row) = strchr(*row, instructionPrefix);
-
+		(*o_address) = g_DC; /* backup g_DC before advancing it */
 		/* is a data instruction */
 		if (!strcmp(instruction, DATA_INSTRUCTION))
 		{
@@ -137,7 +137,10 @@ int parseInstruction(const char **row, int  *o_labelFlag){
 			
 		/* it begins with a '.' but is neither .string nor .data, .entry, .extern */
 		else {
-			reportError("Error!unknown data instruction\n",ERROR);
+			if (-1 == getDecOpcode(instruction))
+				return reportError("Error!, illegal operation code\n",ERROR);
+
+
 		}
 	}
 
