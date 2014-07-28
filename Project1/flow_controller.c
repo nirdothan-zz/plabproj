@@ -116,7 +116,7 @@ int parseRowFirst(const char *row){
 			return insertLabel(label, DATA_LABEL, orig_address);
 		else
 		{
-			orig_address = g_IC;
+			
 			/*step #11 on p 28 */
 			return insertLabel(label, CODE_LABEL, orig_address);
 		}

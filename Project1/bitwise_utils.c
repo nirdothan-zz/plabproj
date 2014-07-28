@@ -33,7 +33,7 @@ void mapword(Word_t target, const int src)
 	target[0] = (src & 0xff);	  /* 8 LSBs of src are mapped to target[0] byte*/
 	target[1] = (src>>8 & 0xff);  /* 8 next bits of src are mapped to target[1] byte*/
 	target[2] = (src>>16 & 0x3f); /* 4 MSBs of src are mapped to target[2] 4 LSBs*/
-	
+	print20LSBs(target);
 }
 
 /*

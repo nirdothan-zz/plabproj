@@ -36,13 +36,13 @@ typedef struct {
 } Fields_t;
 
 typedef struct opcodes {
-	char opcode[4];
+	char opcode[5];
 	int decimal;
 	int octal;
 	int group; /*BINARY, UNARY, NOPARAMS*/
 } Opcodes_t;
 
-enum { BINARY, UNARY, NOPARAMS }; /* for operation type */
+enum { NOPARAMS = 0, UNARY = 1, BINARY = 2 }; /* for operation type */
 
 #define INP_SUFFIX ".as"
 #define EXT_SUFFIX ".ext"

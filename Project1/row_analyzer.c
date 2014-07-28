@@ -12,12 +12,16 @@ int isCommentOrEmpty(const char*);
 int isValidLabelChar(const char);
 int storeString(const char *);
 int storeData(const char *);
+void calculateAdditionalWords(char*, int);
+void incrementICforParam(char *);
 
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
+
 	char dummy[MSG_MAX_SIZE];
+
 	/* if sscanf returned 0 then all chars were white spaces */
-	return (( COMMENT_CHAR == row[0] )|| (!sscanf(row,"%s", dummy)));
+	return (( COMMENT_CHAR == row[0] )|| (1>sscanf(row,"%s", dummy)));
 
 }
 
@@ -148,7 +152,7 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 	/*TODO remove */
 	/* not a data instruction */
 	else {
-		
+		(*o_address) = g_IC; /* backup g_IC before advancing it */
 		(*row) = strchr(*row, '/');
 		if (!(*row))
 			return reportError("Error!, illegal syntax, could not find '/' after opcode \n", ERROR);
@@ -161,15 +165,19 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 			return reportError("Error!, illegal operation code\n", ERROR);
 			break;
 		case UNARY:
+			calculateAdditionalWords(*row, UNARY);
 			break;
 		case BINARY:
+			calculateAdditionalWords(*row, BINARY);
 			break;
 		case NOPARAMS:
-			g_IC++;
+			/* the operation has no additional words */
 			break;
 		}
 	}
 	
+		/* Increment IC by one, to account for the instruction word itself */
+		g_IC++;
 
 		return NORMAL;
 }
@@ -204,22 +212,115 @@ int storeData(char *data){
 
 /* parse the ".string" instruction and stores its chars in the data image */
 int storeString(char *data){
-	char string[MAX_ROW_SIZE];
+	char *string;
 	int i=0;
-	if (sscanf(data, "%s", &string) != 1){
-		return reportError("Error! Ilegal string value\n", ERROR);
-	}
 
-	
-	/* traverse string chars until null terminator*/
-	while (string[i]){
-		/*map each chars ascii value to a separate row in the data image*/
-		mapword(&(g_dataSegment[g_DC++]), string[i++]);
-	}
+	/* TODO add tab support */
+	/*get to opening " */
+	while (*data == ' ' ||  *data=='\t')
+		data++;
+
+	if (*data != '"')
+		return reportError("Error! Ilegal string value - could not find opening quotes\n", ERROR);
+	else
+		data++;
+
+	string = strchr(data, '"');
+	if (!string)
+		return reportError("Error! Ilegal string value - could not find closing quotes\n", ERROR);
+
+	/*put a null terminator where the closing quotes were*/
+	*string = '\0';
+
+
+
+	while (data[i]){
+			/*map each chars ascii value to a separate row in the data image*/
+			mapword(&(g_dataSegment[g_DC++]), data[i++]);
+			print20LSBs(&(g_dataSegment[g_DC-1]));
+			
+		}
+
+
 
 	/*apend a null terminator row at the end of the string data image and increment counter*/
 	memset((&(g_dataSegment[g_DC++])),0,sizeof(Word_t));
 	
+
+	
 	return NORMAL;
 }
 
+void calculateAdditionalWords(char *row, int paramNo )
+{
+	char *f1=0, *f2=0, arr[MAX_ROW_SIZE];
+	/* get us to the dbl field */
+	row = strchr(row, ',');
+	if (!row)
+	{
+		reportError("Error!, illegal syntax, could not find ',' after '/' \n", ERROR);
+		return;
+	}
+
+	/*pass the dbl filed*/
+	row+=2;
+
+	switch (paramNo)
+	{
+	case UNARY:
+		if (1 != sscanf(row, "%s", arr)){
+			reportError("Error!, illegal syntax for unary operation, could not find operation param \n", ERROR);
+			return;
+		}
+
+		incrementICforParam(arr);
+		break;
+	case BINARY:
+		
+		
+		f1=strtok(row, ",");
+		if (!f1)
+		{
+			reportError("Error!, illegal syntax for binary operation, could not find operation param 1 \n", ERROR);
+			return;
+		}
+		f2=strtok(NULL, ",");
+		if (!f2)
+		{
+			reportError("Error!, illegal syntax for binary operation, could not find operation param 2 \n", ERROR);
+			return;
+		}
+		incrementICforParam(f1);
+		incrementICforParam(f2);
+		
+	}
+		
+	
+
+}
+
+
+void incrementICforParam(char *param)
+{
+	/*advance pointer if white spaces */
+	while (*param == ' ' || *param == '\t' )
+		param++;
+
+	/* register addressing */
+	if (param[0] == 'r' && param[1] >= '0' && param[1] <= '7')
+	{
+		/* no additional words needed for register addressing method*/
+		
+		/* dynamic addressing*/
+	}
+	else if (strchr(param, '{'))
+	{
+		/*dynamic addressing has 2 additional words*/
+		g_IC += 2;
+	}
+	/* direct or immediate addressing */
+	else {
+		g_IC++;
+	}
+
+}

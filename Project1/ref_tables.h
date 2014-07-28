@@ -8,21 +8,21 @@
 
 /* mapping of opcodes to decimal and octal values */
 static Opcodes_t opcodes[] = {
-		{ "mov", 0,  0,2},
-		{ "cmp", 1,  1,2},
-		{ "add", 2,  2,2},
-		{ "sub", 3,  3,2},
-		{ "not", 4,  4,1},
-		{ "clr", 5,  5,1},
-		{ "lea", 6,  6,2},
-		{ "inc", 7,  7,1},
-		{ "dec", 8, 10,1},
-		{ "jmp", 9, 11,1},
-		{ "bne", 10,12,1},
-		{ "red", 11,13,1},
-		{ "prn", 12,14,1},
-		{ "jsr", 13,15,1},
-		{ "rts", 14,16,0},
-		{ "stop",15,17,0}
+		{ "mov", 0, 0,   BINARY  },
+		{ "cmp", 1, 1,   BINARY  },
+		{ "add", 2, 2,   BINARY  },
+		{ "sub", 3, 3,   BINARY  },
+		{ "not", 4, 4,   UNARY   },
+		{ "clr", 5, 5,   UNARY   },
+		{ "lea", 6, 6,   BINARY  },
+		{ "inc", 7, 7,   UNARY   },
+		{ "dec", 8, 10,  UNARY   },
+		{ "jmp", 9, 11,  UNARY   },
+		{ "bne", 10, 12, UNARY   },
+		{ "red", 11, 13, UNARY   },
+		{ "prn", 12, 14, UNARY   },
+		{ "jsr", 13, 15, UNARY   },
+		{ "rts", 14, 16, NOPARAMS},
+		{ "stop",15, 17, NOPARAMS}
 
 };

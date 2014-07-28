@@ -6,6 +6,7 @@ void processSingleFile(char *inputFile)
 {
 	printf("file: %s\n", inputFile);
 	firstPass(inputFile);
+	secondPass();
 }
 
 void main(int argc, char **argv)

@@ -53,11 +53,15 @@ int  getOpcodeGroup(char *op){
 	char trimmedOp[MAX_ROW_SIZE];
 
 	trimSlash(trimmedOp,op);
+
+	printf("checking opr <%s>\n", trimmedOp);
 	
 	FINDINREF(opcodes, Opcodes_t, opcode, trimmedOp, group, res);
 	return res;
 }
 
+/* used to trip the slash and everything after it from the opcode, if exists
+if no slash exists, the dst string remains equal to the src */
 void trimSlash(char *dst, char *src){
 	int  trimsize;
 	char  *p;
