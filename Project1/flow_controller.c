@@ -19,6 +19,7 @@ static char labelFlag = 0;			/* module level label idenfification flag */
 
 
 int parseRowFirst(const char *);
+int parseRowSecond(const char *);
 int insertLabel(char *, int);
 
 int firstPass(char *inputFile){
@@ -32,8 +33,8 @@ int firstPass(char *inputFile){
 
 
 	/* open input file for reading*/
-	if (ERROR == initForFile(inputFile))
-		return ERROR;
+	if (FATAL == initForFile(inputFile))
+		return FATAL;
 
 
 	/* process one row at a time*/
@@ -48,6 +49,23 @@ int firstPass(char *inputFile){
 
 int secondPass()
 {
+	int status;
+	char *row = NULL;
+
+	int lastIC = g_IC;
+	/* 	step #1 on p 28	*/
+	g_IC = 0;
+
+	rewindInputFile();
+
+	/* process one row at a time*/
+	while (END != readLine(&row)){
+		status = parseRowSecond(row);
+		free(row);
+		if (FATAL == status)
+			return FATAL;
+
+	}
 
 
 
@@ -136,6 +154,63 @@ int parseRowFirst(const char *row){
 
 }
 
+
+
+/* row level parsing activities for first pass */
+int parseRowSecond(const char *row){
+	int status, orig_address = 0;
+	char label[MAX_LABEL_SIZE + 1];
+	int instructionFlag = 0;	 /*  instruction idenfification flag */
+
+
+	printf("row is <%s>\n", row);
+
+	if (isCommentOrEmpty(row))
+		return NORMAL;
+
+
+	/*
+	step #2 on p 28 - second pass
+	*/
+	if ((status = parseLabel(&row, &labelFlag, label)) != NORMAL)
+		return status;
+
+
+	/*
+	step #5 and #8 on p 28
+	if data instruction is found the instructionFlag is set per enum
+	*/
+	if ((status = parseInstructionSecondPass(&row, &instructionFlag, &orig_address)) != NORMAL)
+		return status;
+
+
+
+	/* 	step #6 on p 28 */
+	if (labelFlag) {
+		if (DATA_INSTRUCTION_FLAG == instructionFlag ||
+			STRING_INSTRUCTION_FLAG == instructionFlag)
+			return insertLabel(label, DATA_LABEL, orig_address);
+		else
+		{
+
+			/*step #11 on p 28 */
+			return insertLabel(label, CODE_LABEL, orig_address);
+		}
+	}
+
+
+	/* 	step #9 on p 28 */
+	if (EXTERN_INSTRUCTION_FLAG == instructionFlag){
+		char label[MAX_LABEL_SIZE + 1];
+		if (sscanf(row, "%s", label) != 1)
+			return  reportError("Error! Illegal external instruction\n", ERROR);
+		return insertLabel(label, EXT_LABEL, 0);
+	}
+
+
+	return NORMAL;
+
+}
 
 /* insert a label into the label table */
 int insertLabel(char *label, int type, int label_dec_address)

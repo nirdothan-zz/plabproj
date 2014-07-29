@@ -215,7 +215,6 @@ int storeString(char *data){
 	char *string;
 	int i=0;
 
-	/* TODO add tab support */
 	/*get to opening " */
 	while (*data == ' ' ||  *data=='\t')
 		data++;
@@ -323,4 +322,108 @@ void incrementICforParam(char *param)
 		g_IC++;
 	}
 
+}
+
+
+
+/*
+parse the possible data instruction part of the row
+the pointer is moved to after the instruction if exists
+*/
+int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_address){
+
+	int status;
+	char instruction[MAX_LABEL_SIZE];
+	char instructionPrefix = '.';
+	status = sscanf(*row, "%s", instruction);
+
+
+
+	/*init instruction flag to be used as by the calling function */
+	(*o_labelFlag) = NO_INST_FLAG;
+	if (!status)
+		return reportError("Error! Illegal or missing instruction\n", ERROR);
+
+
+	/* is an instruction */
+	if (instructionPrefix == instruction[0]){
+
+
+
+		/* advance pointer to the '.' char */
+		(*row) = strchr(*row, instructionPrefix);
+
+		/* step #4 - page 28*/
+		/* is a data instruction */
+		if (!strcmp(instruction, DATA_INSTRUCTION) || !strcmp(instruction, STRING_INSTRUCTION))
+			return NORMAL;
+
+		/* step #5-6 - page 28*/
+		if (!strcmp(instruction, ENTRY_INSTRUCTION)){
+	
+			/* advance pointer to after the ".entry" string */
+			(*row) += strlen(ENTRY_INSTRUCTION);
+			sscanf(*row, "%s", *row);
+			int dec = getSymbolDecimal(*row);
+			insertLabel(*row, ENT_LABEL, dec);
+
+		}
+	}
+
+	//	/* is an extern instruction */
+	//	if (!strcmp(instruction, EXTERN_INSTRUCTION))
+	//	{
+	//		(*o_labelFlag) = EXTERN_INSTRUCTION_FLAG;
+	//		/* advance pointer to after the ".extren" string */
+	//		(*row) += strlen(EXTERN_INSTRUCTION);
+	//		return NORMAL;
+	//	}
+	//	/* is an extern instruction */
+	//	else if (!strcmp(instruction, ENTRY_INSTRUCTION))
+	//	{
+	//		(*o_labelFlag) = ENTRY_INSTRUCTION_FLAG;
+	//		/* advance pointer to after the ".entry" string */
+	//		(*row) += strlen(ENTRY_INSTRUCTION);
+	//		return NORMAL;
+	//	}
+
+	//	/* it begins with a '.' but is neither .string nor .data, .entry, .extern */
+	//	else {
+
+	//		return reportError("Error!, illegal instruction\n", ERROR);
+
+	//	}
+	//}
+
+	///*TODO remove */
+	///* not a data instruction */
+	//else {
+	//	(*o_address) = g_IC; /* backup g_IC before advancing it */
+	//	(*row) = strchr(*row, '/');
+	//	if (!(*row))
+	//		return reportError("Error!, illegal syntax, could not find '/' after opcode \n", ERROR);
+
+
+
+	//	/* calculate the size of the instruction */
+	//	switch (getOpcodeGroup(instruction)){
+	//	case KNF:
+	//		return reportError("Error!, illegal operation code\n", ERROR);
+	//		break;
+	//	case UNARY:
+	//		calculateAdditionalWords(*row, UNARY);
+	//		break;
+	//	case BINARY:
+	//		calculateAdditionalWords(*row, BINARY);
+	//		break;
+	//	case NOPARAMS:
+	//		/* the operation has no additional words */
+	//		break;
+	//	}
+	//}
+
+	///* Increment IC by one, to account for the instruction word itself */
+	//g_IC++;
+
+	return NORMAL;
 }

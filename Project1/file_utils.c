@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-FILE *ifd, *ofd, *exfd, *enfd;
+static FILE *ifd, *ofd, *exfd, *enfd;
 
 /*
 File handling module. Includes all file open close, read and write utilities
@@ -18,13 +18,8 @@ int initForFile(const char * inputFile)
 	{
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "couldn't open file <%s>\n", infile);
-
-		return reportError(msg, ERROR);
+		return reportError(msg, FATAL);
 	}
-
-
-
-
 }
 
 
@@ -41,14 +36,7 @@ int readLine(char **line){
 
 	status = fgets(*line, MAX_ROW_SIZE, ifd);
 
-	/*if (!status){
-		char msg[MSG_MAX_SIZE];
-		sprintf(msg, "Error! could not read line from file <%s>\n", ifd->_tmpfname);
-
-		return reportError(msg, ERROR);
-
-	}*/
-
+	
 	if (!status)
 		return END;
 	
@@ -57,4 +45,9 @@ int readLine(char **line){
 	/* increment line count in error handler */
 	incrementLine();
 	return NORMAL;																				
+}
+
+/* rewind the input file */
+void rewindInputFile(){
+	rewind(ifd);
 }

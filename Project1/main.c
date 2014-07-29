@@ -5,7 +5,8 @@
 void processSingleFile(char *inputFile)
 {
 	printf("file: %s\n", inputFile);
-	firstPass(inputFile);
+	if (firstPass(inputFile) == FATAL)
+		return ;
 	secondPass();
 }
 

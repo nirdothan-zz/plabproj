@@ -1,6 +1,9 @@
 #include <string.h>
 #include "ref_tables.h"
 
+extern Symbol_t *g_symbolTable;
+extern int g_symbolTableSize;
+
 
 /* generic macro to lookup values in reference tables */
 /* params:
@@ -30,6 +33,31 @@
 void trimSlash(char *, char *);
 int  getOpcodeGroup(char *);
 int  getDecOpcode(char *op);
+
+
+int getSymbolDecimal(char *symbol){
+	int i = 0; 
+		
+	while (i < g_symbolTableSize) 
+	{ 
+		if (!strcmp(g_symbolTable[i].label, symbol))
+			return g_symbolTable[i].decimal;
+		i++; 
+	}
+	return KNF;
+}
+
+int getSymbolDecimalOfType(char *symbol, int sym_type){
+	int i = 0;
+
+	while (i < g_symbolTableSize)
+	{
+		if (!strcmp(g_symbolTable[i].label, symbol) && g_symbolTable[i].type == sym_type)
+			return g_symbolTable[i].decimal;
+		i++;
+	}
+	return KNF;
+}
 
 
 /*returns the octal mapping of a given opcode*/

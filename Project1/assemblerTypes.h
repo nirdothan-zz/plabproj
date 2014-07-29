@@ -65,7 +65,7 @@ enum { NORMAL=0, END, WARNING, ERROR, FATAL };
 #define ENTRY_INSTRUCTION ".entry"
 #define KNF -1 /*Key Not Found value for referece tables*/
 
-enum {DATA_LABEL, CODE_LABEL, EXT_LABEL  };
+enum {DATA_LABEL, CODE_LABEL, EXT_LABEL, ENT_LABEL  };
 
 /*indicates instuction types identified*/
 enum { NO_INST_FLAG = 0, DATA_INSTRUCTION_FLAG, STRING_INSTRUCTION_FLAG, EXTERN_INSTRUCTION_FLAG, ENTRY_INSTRUCTION_FLAG };
