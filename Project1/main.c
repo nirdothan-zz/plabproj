@@ -14,10 +14,10 @@ void main(int argc, char **argv)
 {
 	int i;
 	initPrgram("assembler");
-
+//	dummytests();
 	
 
-//	return;
+ //  return;
 	for (i = 1; i < argc; i++){
 		//printf("argv[%d]=%s\n", i,argv[i]);
 

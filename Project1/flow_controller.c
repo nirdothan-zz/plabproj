@@ -14,13 +14,17 @@ int g_IC = INIT_IC;					/* global instructions counter */
 int g_DC = INIT_DC;					/* global data counter */
 Symbol_t *g_symbolTable;			/* global symbol table */
 int g_symbolTableSize=0;			/* global symbol table current size */
+Symbol_t *g_externalTable;			/* global external table */
+int g_externalTableSize = 0;			/* global external table current size */
+Symbol_t *g_entryTable;			/* global entry table */
+int g_entryTableSize = 0;			/* global entry table current size */
 
 static char labelFlag = 0;			/* module level label idenfification flag */
 
 
 int parseRowFirst(const char *);
 int parseRowSecond(const char *);
-int insertLabel(char *, int);
+
 
 int firstPass(char *inputFile){
 	int status;
@@ -28,6 +32,12 @@ int firstPass(char *inputFile){
 
 	g_symbolTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
 	if (!g_symbolTable)
+		return reportError("Fatal! Unable to allocate memory\n", FATAL);
+	g_entryTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
+	if (!g_entryTable)
+		return reportError("Fatal! Unable to allocate memory\n", FATAL);
+	g_externalTable = (Symbol_t*)malloc(sizeof(Symbol_t) * MAX_SYMBOLS);
+	if (!g_entryTable)
 		return reportError("Fatal! Unable to allocate memory\n", FATAL);
 
 
@@ -70,29 +80,35 @@ int secondPass()
 
 
 	free(g_symbolTable);
+	free(g_entryTable);
+	free(g_externalTable);
 
 }
 
 int dummytests(){
 	Fields_t fields;
-	Word_t w;
+	Word_t w,w1;
 	int a = pow(2.0,19.0)-1;
 
 	memset(&fields, 0, sizeof(fields));
-	fields.comb = 3;
-	fields.target_addr = 3;
-	fields.src_addr = 3;
-		fields.type = 1;
-		fields.dbl = 1;
+	//fields.opcode = 6;
+	//fields.comb = 3;
 
+//	fields.target_reg = 7;
+//fields.target_addr = 3;
+fields.src_reg = 7;
+	fields.src_addr = 0;
+	fields.type = 0;
+	fields.dbl = 0;
+//	mapword(w1, fields);
 
-	print20LSBs(&fields);
+	a = 7;
+	a <<= 7;
+	//mapword(w1, a);
+	set_comb(w1, 3);
+	print20LSBs(w1);
+	
 
-
-	mapword(w, a);
-	print20LSBs(w);
-	print20LSBs(&a);
-	printHEX(w);
 
 
 }
@@ -185,43 +201,11 @@ int parseRowSecond(const char *row){
 
 
 
-	/* 	step #6 on p 28 */
-	if (labelFlag) {
-		if (DATA_INSTRUCTION_FLAG == instructionFlag ||
-			STRING_INSTRUCTION_FLAG == instructionFlag)
-			return insertLabel(label, DATA_LABEL, orig_address);
-		else
-		{
-
-			/*step #11 on p 28 */
-			return insertLabel(label, CODE_LABEL, orig_address);
-		}
-	}
-
-
-	/* 	step #9 on p 28 */
-	if (EXTERN_INSTRUCTION_FLAG == instructionFlag){
-		char label[MAX_LABEL_SIZE + 1];
-		if (sscanf(row, "%s", label) != 1)
-			return  reportError("Error! Illegal external instruction\n", ERROR);
-		return insertLabel(label, EXT_LABEL, 0);
-	}
 
 
 	return NORMAL;
 
 }
 
-/* insert a label into the label table */
-int insertLabel(char *label, int type, int label_dec_address)
-{
 
-	strcpy((g_symbolTable[g_symbolTableSize]).label, label);
-	(g_symbolTable[g_symbolTableSize]).type = type;
-	(g_symbolTable[g_symbolTableSize]).decimal = label_dec_address;
-	(g_symbolTable[g_symbolTableSize]).octal = getOctal(label_dec_address);
-	g_symbolTableSize++;
-	
-	return NORMAL;
-}
 

@@ -3,6 +3,10 @@
 
 extern Symbol_t *g_symbolTable;
 extern int g_symbolTableSize;
+extern Symbol_t *g_externalTable;			
+extern int g_externalTableSize;
+extern Symbol_t *g_entryTable;			
+extern int g_entryTableSize;
 
 
 /* generic macro to lookup values in reference tables */
@@ -104,4 +108,38 @@ void trimSlash(char *dst, char *src){
 	strncpy(dst, src, trimsize);
 	dst[trimsize] = '\0';
 
+}
+
+/* insert a label into the label tables */
+int insertLabel(char *label, int tableType, int label_dec_address)
+{
+
+
+	switch (tableType){
+	case EXT_LABEL:
+		strcpy((g_externalTable[g_externalTableSize]).label, label);
+		(g_externalTable[g_externalTableSize]).type = tableType;
+		(g_externalTable[g_externalTableSize]).decimal = label_dec_address;
+		(g_externalTable[g_externalTableSize]).octal = getOctal(label_dec_address);
+		g_externalTableSize++;
+
+	case DATA_LABEL:
+	case CODE_LABEL:
+		strcpy((g_symbolTable[g_symbolTableSize]).label, label);
+		(g_symbolTable[g_symbolTableSize]).type = tableType;
+		(g_symbolTable[g_symbolTableSize]).decimal = label_dec_address;
+		(g_symbolTable[g_symbolTableSize]).octal = getOctal(label_dec_address);
+		g_symbolTableSize++;
+		break;
+	case ENT_LABEL:
+		strcpy((g_entryTable[g_entryTableSize]).label, label);
+		(g_entryTable[g_entryTableSize]).type = tableType;
+		(g_entryTable[g_entryTableSize]).decimal = label_dec_address;
+		(g_entryTable[g_entryTableSize]).octal = getOctal(label_dec_address);
+		g_entryTableSize++;
+		break;
+
+	}
+
+	return NORMAL;
 }

@@ -18,6 +18,8 @@ typedef struct {
 	int type;
 } Symbol_t;
 
+
+/* TODO remove this struct - not in use*/
 /* 
 bit fileds helper struct to assit with bit manipulation
 
