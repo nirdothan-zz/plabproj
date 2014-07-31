@@ -63,6 +63,17 @@ int getSymbolDecimalOfType(char *symbol, int sym_type){
 	return KNF;
 }
 
+int isSrcAddressingMethodValid(char *op, int method){
+	int *res;
+	FINDINREF(opcodes, Opcodes_t, opcode, op, sourceAddressingMethods, res)	
+	return res[method];
+}
+
+int isDstAddressingMethodValid(char *op, int method){
+	int *res;
+	FINDINREF(opcodes, Opcodes_t, opcode, op, targetAddressingMethods, res)
+	return res[method];
+}
 
 /*returns the octal mapping of a given opcode*/
 int  getOctOpcode(char *op){

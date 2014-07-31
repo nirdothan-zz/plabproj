@@ -19,6 +19,7 @@ typedef struct {
 } Symbol_t;
 
 
+
 /* TODO remove this struct - not in use*/
 /* 
 bit fileds helper struct to assit with bit manipulation
@@ -42,7 +43,13 @@ typedef struct opcodes {
 	int decimal;
 	int octal;
 	int group; /*BINARY, UNARY, NOPARAMS*/
+	int sourceAddressingMethods[4];
+	int targetAddressingMethods[4];
 } Opcodes_t;
+
+
+
+
 
 enum { NOPARAMS = 0, UNARY = 1, BINARY = 2 }; /* for operation type */
 
@@ -71,3 +78,6 @@ enum {DATA_LABEL, CODE_LABEL, EXT_LABEL, ENT_LABEL  };
 
 /*indicates instuction types identified*/
 enum { NO_INST_FLAG = 0, DATA_INSTRUCTION_FLAG, STRING_INSTRUCTION_FLAG, EXTERN_INSTRUCTION_FLAG, ENTRY_INSTRUCTION_FLAG };
+
+/* addressing methods */
+enum { IMMEDIATE = 0, DIRECT=1, DYNAMIC_INDEX=2,  REGISTER=3};

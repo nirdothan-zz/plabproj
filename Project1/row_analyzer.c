@@ -17,9 +17,9 @@ int storeString(const char *);
 int storeData(const char *);
 void calculateAdditionalWords(char*, int);
 void incrementICforParam(char *);
-int encodeUnaryOpr(char *, int );
-int encodeBinaryOpr(char *, int );
-int encodeNoParamOpr(char *, int );
+int encodeUnaryOpr(char *, char* );
+int encodeBinaryOpr(char *, char*);
+int encodeNoParamOpr(char *, char*);
 
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
@@ -393,13 +393,13 @@ int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_addre
 				return reportError("Error!, illegal operation code\n", ERROR);
 				break;
 			case UNARY:
-				encodeUnaryOpr(*row, getOctOpcode(instruction));
+				encodeUnaryOpr(*row, instruction);
 				break;
 			case BINARY:
-				encodeBinaryOpr(*row, getOctOpcode(instruction));
+				encodeBinaryOpr(*row, instruction);
 				break;
 			case NOPARAMS:
-				encodeNoParamOpr(*row, getOctOpcode(instruction));
+				encodeNoParamOpr(*row, instruction);
 				break;
 				}
 		}
@@ -416,10 +416,11 @@ int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_addre
 
 /* encode a unary operation */
 /* e.g.   clr/1/0,0 r1  */
-int encodeUnaryOpr(char *row, int opcode){
+int encodeUnaryOpr(char *row, char *op){
 
 	char type, dbl;
 	int status;
+	int opcode = getOctOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
@@ -499,9 +500,11 @@ int encodeUnaryOpr(char *row, int opcode){
 
 /* encode a binary operation */
 /* e.g.   mov/1/0/1,0 x,r1  */
-int encodeBinaryOpr(char *row, int opcode){
-	char type,dbl;
+int encodeBinaryOpr(char *row, char *op){
+	char type, dbl;
+	char src_opr[MAX_ROW_SIZE], dst_opr[MAX_ROW_SIZE], *helper;
 	int status;
+	int opcode = getOctOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
@@ -567,19 +570,78 @@ int encodeBinaryOpr(char *row, int opcode){
 
 	/*advance pointer passed the double filed to the white space before first operand*/
 	row++; /*e.g.    x,r1  */
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')
+		row++;
 
+
+	if (sscanf(row, "%s", src_opr) < 1)
+		return reportError("Error, could not parse operands\n", ERROR);
 	
+	/*if src_opr includes a comma, then there's no space beween
+	the operand and the comma -> null terminate the operand at the comma sign */
+	helper = strchr(src_opr, ',');
+	if (helper)
+		(*helper) = 0;
 
 
+	if (!isSrcAddressingMethodValid(op, getAddressingMethod(src_opr)))
+	{
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! [%s] is an illegal source addressing method  for opr [%s]\n", src_opr, op);
+		return reportError(msg, ERROR);
+
+	}
+
+	/*go to comma for last operand*/
+	row = strchr(row, ',');
+	if (!row)
+		reportError("Syntax Error: comma not found for second operand\n",ERROR);
+	
+	row++;
+	if (sscanf(row, "%s", dst_opr) < 1)
+		return reportError("Error, could not parse operands\n", ERROR);
+
+
+
+	if (!isDstAddressingMethodValid(op, getAddressingMethod(dst_opr)))
+	{
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! [%s] is an illegal destination addressing method  for opr [%s]\n", dst_opr, op);
+		return reportError(msg, ERROR);
+
+	}
 
 	print20LSBs(&(g_programSegment[g_IC]));
 
 }
 
-int encodeNoParamOpr(char *row, int opcode){
+int encodeNoParamOpr(char *row, char *op){
 	char tmp, status;
+	int opcode = getOctOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
 	set_opcode(&(g_programSegment[g_IC]), opcode);
+}
+
+
+
+
+int getAddressingMethod(char *operand){
+
+	sscanf(operand, "s", operand);
+
+	if (operand[0] == '#')
+		return IMMEDIATE;
+
+	if (operand[0] == 'r' && operand[1] >= '0' && operand[1] <= '7')
+		return REGISTER;
+
+	if (strchr(operand, '{'))
+		return DYNAMIC_INDEX;
+
+	return DIRECT;
+
+
 }
