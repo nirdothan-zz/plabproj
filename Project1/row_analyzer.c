@@ -553,7 +553,6 @@ int encodeBinaryOpr(char *row, int opcode){
 		return reportError("Error - comma not found\n", ERROR);
 
 
-
 	/*advance pointer passed comma to double filed*/
 	row++; /*e.g.   0 x,r1  */
 	status = sscanf(row, "%c", &dbl);
@@ -565,7 +564,12 @@ int encodeBinaryOpr(char *row, int opcode){
 		return reportError(msg, ERROR);
 	}
 
+
+	/*advance pointer passed the double filed to the white space before first operand*/
+	row++; /*e.g.    x,r1  */
+
 	
+
 
 
 	print20LSBs(&(g_programSegment[g_IC]));
