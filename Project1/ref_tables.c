@@ -51,6 +51,18 @@ int getSymbolDecimal(char *symbol){
 	return KNF;
 }
 
+
+int getSymbolOctall(char *symbol){
+	int i = 0;
+
+	while (i < g_symbolTableSize)
+	{
+		if (!strcmp(g_symbolTable[i].label, symbol))
+			return g_symbolTable[i].octal;
+		i++;
+	}
+	return KNF;
+}
 int getSymbolDecimalOfType(char *symbol, int sym_type){
 	int i = 0;
 

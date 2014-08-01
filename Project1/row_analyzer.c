@@ -4,7 +4,7 @@
 
 /* traslate ascii '1' or '0' to 1 or 0*/
 #define BINVAL(C) ((C)=='1' ? 1 : 0 )
-
+enum {SRC,DST};
 extern Word_t g_dataSegment[];
 extern Word_t g_programSegment[];
 extern int g_DC;
@@ -21,6 +21,49 @@ int encodeUnaryOpr(char *, char* );
 int encodeBinaryOpr(char *, char*);
 int encodeNoParamOpr(char *, char*);
 
+
+int parseDynamicOperand(char *opr, int *o_label, int *o_index){
+	char *p,*p1, op[MAX_LABEL_SIZE+1];
+
+	p = strchr(opr, '{');
+	if (!p)
+			return reportError("Syntax error: invfalid syntax of dynamic addressing operand - missing { char\n",ERROR);
+	*p = 0;
+	if (sscanf(opr,"%s",op) < 1)
+		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing label\n", ERROR);
+	(*o_label) = getSymbolOctall(op);
+	if (KNF == (*o_label)){
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! label [%s] not founf in table\n", op);
+		return reportError(msg, ERROR);
+	}
+
+	p = strchr(opr, '!');
+	if (!p)
+		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing ! char\n", ERROR);
+	/*advance passed ! */
+	p++;
+
+	p1 = strchr(opr, '}');
+	if (!p)
+		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing } char\n", ERROR);
+	
+	/*null terminate*/
+	*p1 = 0;
+
+	if (sscanf(p, "%s", op)<1)
+		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing index label\n", ERROR);
+	(*o_index) = getSymbolOctall(op);
+	if (KNF == (*o_index)){
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! index label [%s] not founf in table\n", op);
+		return reportError(msg, ERROR);
+	}
+
+	return NORMAL;
+
+
+}
 /* check if the row string represents a comment or an empty line */
 int isCommentOrEmpty(const char *row){
 
@@ -586,17 +629,21 @@ int encodeBinaryOpr(char *row, char *op){
 
 
 	addressingMethod = getAddressingMethod(src_opr);
-		if (!isSrcAddressingMethodValid(op, addressingMethod))
+	if (!isSrcAddressingMethodValid(op, addressingMethod))
 	{
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "Error! [%s] is an illegal source addressing method  for opr [%s]\n", src_opr, op);
 		return reportError(msg, ERROR);
 
 	}
-
-		additionalWordsOffset = 0;
-		encodeOperand(src_opr, addressingMethod, &additionalWordsOffset);
-
+	
+	/*encode the addressing method for source operand*/
+	set_src_addr(&(g_programSegment[g_IC]), addressingMethod);
+	additionalWordsOffset = 0;
+	
+	status=encodeOperand(src_opr, addressingMethod, SRC, &additionalWordsOffset);
+	if (NORMAL != status)
+		return status;
 
 
 
@@ -618,9 +665,12 @@ int encodeBinaryOpr(char *row, char *op){
 		return reportError(msg, ERROR);
 
 	}
+	/*encode the addressing method for target operand*/
+	set_target_addr(&(g_programSegment[g_IC]), addressingMethod);
+	status = encodeOperand(dst_opr, addressingMethod, DST, &additionalWordsOffset);
+	return status;
 
-	print20LSBs(&(g_programSegment[g_IC]));
-
+	
 }
 
 int encodeNoParamOpr(char *row, char *op){
@@ -657,32 +707,49 @@ int getAddressingMethod(char *operand){
 /* encodes a given operand 
 o_additionalWords indicates many additional words were populated 
 */
-int encodeOperand(char *operand, int method, int *o_additionalWords){
-	
-
+int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords){
+	int address, addWordIndex=0; 
 	
 	switch (method){
 	case DYNAMIC_INDEX:
+
 		break;
 	case REGISTER:
+		address = operand[1] - '0';
+		if (SRC == srcdst)
+			set_src_reg(&(g_programSegment[g_IC]), address);
+		else if (DST == srcdst)
+			set_target_reg(&(g_programSegment[g_IC]), address);
+		else
+			reportError("Error, invalid source or target indication\n", ERROR);
+	
 		break;
 	case DIRECT:
+		/*increment aditional words used  */
+		(*o_additionalWords)++;
+		addWordIndex = g_IC + *o_additionalWords;
+		address = getSymbolOctall(operand);
+		if (KNF == address)
+			return reportError("Label Error!, label not found in table\n",ERROR);
+		mapword(&(g_programSegment[addWordIndex]), address);
+
 		break;
 	case IMMEDIATE: /*example: mov #-1,r2 */
-	{
-		int address;
-		int addWordIndex = g_IC + (*o_additionalWords) + 1;
+	
+		/*increment aditional words used  */
+		(*o_additionalWords)++;
+		addWordIndex=g_IC + *o_additionalWords;
+
 		/*advance passed the # */
 		operand++;
 
 		if (sscanf(operand, "%d", &address) < 1)
-			reportError("Syntax Error!, Illegal operand syntax for immediate method\n", ERROR);
+			return reportError("Syntax Error!, Illegal operand syntax for immediate method\n", ERROR);
 
 		
 		mapword(&(g_programSegment[addWordIndex]), address);
-		print20LSBs(&(g_programSegment[g_IC]));
-		print20LSBs(&(g_programSegment[addWordIndex]));
-	}
+		
+
 		break;
 	default:
 		reportError("Error!, illegal addressing method\n", ERROR);
