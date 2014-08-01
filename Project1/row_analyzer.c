@@ -21,7 +21,7 @@ int encodeUnaryOpr(char *, char* );
 int encodeBinaryOpr(char *, char*);
 int encodeNoParamOpr(char *, char*);
 
-
+/* get an operand in dynamic addressing method and return both its indexes*/
 int parseDynamicOperand(char *opr, int *o_label, int *o_index){
 	char *p,*p1, op[MAX_LABEL_SIZE+1];
 
@@ -712,7 +712,20 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 	
 	switch (method){
 	case DYNAMIC_INDEX:
+		{
+		int status, label, index;
+		status = parseDynamicOperand(operand, &label, &index);
+		if (NORMAL != status)
+			return status;
+		(*o_additionalWords)++;
+		
+		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), label);
 
+		(*o_additionalWords)++;
+
+		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), index);
+
+		}
 		break;
 	case REGISTER:
 		address = operand[1] - '0';
