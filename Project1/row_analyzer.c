@@ -503,7 +503,7 @@ int encodeUnaryOpr(char *row, char *op){
 int encodeBinaryOpr(char *row, char *op){
 	char type, dbl;
 	char src_opr[MAX_ROW_SIZE], dst_opr[MAX_ROW_SIZE], *helper;
-	int status;
+	int status, addressingMethod, additionalWordsOffset;
 	int opcode = getOctOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
@@ -585,13 +585,20 @@ int encodeBinaryOpr(char *row, char *op){
 		(*helper) = 0;
 
 
-	if (!isSrcAddressingMethodValid(op, getAddressingMethod(src_opr)))
+	addressingMethod = getAddressingMethod(src_opr);
+		if (!isSrcAddressingMethodValid(op, addressingMethod))
 	{
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "Error! [%s] is an illegal source addressing method  for opr [%s]\n", src_opr, op);
 		return reportError(msg, ERROR);
 
 	}
+
+		additionalWordsOffset = 0;
+		encodeOperand(src_opr, addressingMethod, &additionalWordsOffset);
+
+
+
 
 	/*go to comma for last operand*/
 	row = strchr(row, ',');
@@ -603,8 +610,8 @@ int encodeBinaryOpr(char *row, char *op){
 		return reportError("Error, could not parse operands\n", ERROR);
 
 
-
-	if (!isDstAddressingMethodValid(op, getAddressingMethod(dst_opr)))
+	addressingMethod = getAddressingMethod(dst_opr);
+	if (!isDstAddressingMethodValid(op, addressingMethod))
 	{
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "Error! [%s] is an illegal destination addressing method  for opr [%s]\n", dst_opr, op);
@@ -643,5 +650,44 @@ int getAddressingMethod(char *operand){
 
 	return DIRECT;
 
+
+}
+
+
+/* encodes a given operand 
+o_additionalWords indicates many additional words were populated 
+*/
+int encodeOperand(char *operand, int method, int *o_additionalWords){
+	
+
+	
+	switch (method){
+	case DYNAMIC_INDEX:
+		break;
+	case REGISTER:
+		break;
+	case DIRECT:
+		break;
+	case IMMEDIATE: /*example: mov #-1,r2 */
+	{
+		int address;
+		int addWordIndex = g_IC + (*o_additionalWords) + 1;
+		/*advance passed the # */
+		operand++;
+
+		if (sscanf(operand, "%d", &address) < 1)
+			reportError("Syntax Error!, Illegal operand syntax for immediate method\n", ERROR);
+
+		
+		mapword(&(g_programSegment[addWordIndex]), address);
+		print20LSBs(&(g_programSegment[g_IC]));
+		print20LSBs(&(g_programSegment[addWordIndex]));
+	}
+		break;
+	default:
+		reportError("Error!, illegal addressing method\n", ERROR);
+	}
+
+	return NORMAL;
 
 }
