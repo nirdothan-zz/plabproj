@@ -2,12 +2,22 @@
 #include "assemblerTypes.h"
 #include <string.h>
 
-void processSingleFile(char *inputFile)
+int processSingleFile(char *inputFile)
 {
+	int status, outputFlag=1;
 	printf("file: %s\n", inputFile);
-	if (firstPass(inputFile) == FATAL)
-		return ;
-	secondPass();
+	if ((status=firstPass(inputFile)) == FATAL)
+		return FATAL;
+	if (status != NORMAL)
+		outputFlag = 0;
+	updateDataSegemnt();
+	if ((status = secondPass()) == FATAL)
+		return FATAL;
+	if (status != NORMAL)
+		outputFlag = 0;
+	if (outputFlag)
+		writeOutput();
+	cleanup();
 }
 
 void main(int argc, char **argv)
@@ -23,8 +33,5 @@ void main(int argc, char **argv)
 
 		processSingleFile(argv[i]);
 	}
-	//printf(" opcode %d\n", getDecOpcode("jms"));
-	//parseRow("hi");
 	
-	//firstPass();
 }

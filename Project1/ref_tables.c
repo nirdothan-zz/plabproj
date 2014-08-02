@@ -37,7 +37,24 @@ extern int g_entryTableSize;
 void trimSlash(char *, char *);
 int  getOpcodeGroup(char *);
 int  getDecOpcode(char *op);
+void incrementDataLabels(int);
 
+
+/* increment all data labels by value of increment parameter*/
+void incrementDataLabels(int increment){
+	int i = 0;
+
+	while (i < g_symbolTableSize)
+	{
+		if (DATA_LABEL == g_symbolTable[i].type)
+		{
+			g_symbolTable[i].decimal += increment;
+			g_symbolTable[i].octal = getOctal(g_symbolTable[i].decimal);
+		}
+			
+		i++;
+	}
+}
 
 int getSymbolDecimal(char *symbol){
 	int i = 0; 

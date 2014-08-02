@@ -198,7 +198,7 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 		}
 	}
 
-	/*TODO remove */
+
 	/* not a data instruction */
 	else {
 		(*o_address) = g_IC; /* backup g_IC before advancing it */
@@ -461,8 +461,10 @@ int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_addre
 /* e.g.   clr/1/0,0 r1  */
 int encodeUnaryOpr(char *row, char *op){
 
-	char type, dbl;
-	int status;
+	
+	char  type, dbl,src_opr[MAX_ROW_SIZE], *helper;
+	
+	int status, addressingMethod, additionalWordsOffset;
 	int opcode = getOctOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
@@ -528,13 +530,45 @@ int encodeUnaryOpr(char *row, char *op){
 	}
 
 
+	/*advance pointer passed the double filed to the white space before first operand*/
+	row++; /*e.g.    x,r1  */
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')
+		row++;
 
 
-	print20LSBs(&(g_programSegment[g_IC]));
+	if (sscanf(row, "%s", src_opr) < 1)
+		return reportError("Error, could not parse operands\n", ERROR);
+
+	/*if src_opr includes a comma, then there's no space beween
+	the operand and the comma -> null terminate the operand at the comma sign */
+	helper = strchr(src_opr, ',');
+	if (helper)
+		(*helper) = 0;
 
 
+	addressingMethod = getAddressingMethod(src_opr);
+	if (!isDstAddressingMethodValid(op, addressingMethod))
+	{
+		char msg[MSG_MAX_SIZE];
+		sprintf(msg, "Error! [%s] is an illegal source addressing method  for opr [%s]\n", src_opr, op);
+		return reportError(msg, ERROR);
 
+	}
 
+	/*encode the addressing method for source operand*/
+	set_src_addr(&(g_programSegment[g_IC]), addressingMethod);
+	additionalWordsOffset = 0;
+
+	status = encodeOperand(src_opr, addressingMethod, DST, &additionalWordsOffset);
+	if (NORMAL != status)
+		return status;
+
+	/*one for the current primary row + additional rows for additional words allocaled by
+	encodeOperand functiopn */
+	g_IC += (additionalWordsOffset + 1);
+
+	return NORMAL;
 }
 
 
@@ -668,11 +702,18 @@ int encodeBinaryOpr(char *row, char *op){
 	/*encode the addressing method for target operand*/
 	set_target_addr(&(g_programSegment[g_IC]), addressingMethod);
 	status = encodeOperand(dst_opr, addressingMethod, DST, &additionalWordsOffset);
+
+
+	/*one for the current primary row + additional rows for additional words allocaled by 
+	encodeOperand functiopn */
+	g_IC += (additionalWordsOffset + 1);
+
 	return status;
 
 	
 }
 
+/*encode an operation with no operands */
 int encodeNoParamOpr(char *row, char *op){
 	char tmp, status;
 	int opcode = getOctOpcode(op);
@@ -680,6 +721,9 @@ int encodeNoParamOpr(char *row, char *op){
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
 	set_opcode(&(g_programSegment[g_IC]), opcode);
+	g_IC++;
+	return NORMAL;
+
 }
 
 
@@ -704,7 +748,8 @@ int getAddressingMethod(char *operand){
 }
 
 
-/* encodes a given operand 
+/* 
+encodes a given operand 
 o_additionalWords indicates many additional words were populated 
 */
 int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords){

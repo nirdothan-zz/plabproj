@@ -24,7 +24,9 @@ static char labelFlag = 0;			/* module level label idenfification flag */
 
 int parseRowFirst(const char *);
 int parseRowSecond(const char *);
-
+void updateDataSegemnt();
+void writeOutput();
+void cleanup();
 
 int firstPass(char *inputFile){
 	int status;
@@ -62,9 +64,8 @@ int secondPass()
 	int status;
 	char *row = NULL;
 
-	int lastIC = g_IC;
-	/* 	step #1 on p 28	*/
-	g_IC = 0;
+	
+
 
 	rewindInputFile();
 
@@ -79,39 +80,36 @@ int secondPass()
 
 
 
-	free(g_symbolTable);
-	free(g_entryTable);
-	free(g_externalTable);
 
 }
 
-int dummytests(){
-	Fields_t fields;
-	Word_t w,w1;
-	int a = pow(2.0,19.0)-1;
-
-	memset(&fields, 0, sizeof(fields));
-	//fields.opcode = 6;
-	//fields.comb = 3;
-
-//	fields.target_reg = 7;
-//fields.target_addr = 3;
-fields.src_reg = 7;
-	fields.src_addr = 0;
-	fields.type = 0;
-	fields.dbl = 0;
-//	mapword(w1, fields);
-
-	a = 7;
-	a <<= 7;
-	//mapword(w1, a);
-	set_comb(w1, 3);
-	print20LSBs(w1);
-	
-
-
-
-}
+//int dummytests(){
+//	Fields_t fields;
+//	Word_t w,w1;
+//	int a = pow(2.0,19.0)-1;
+//
+//	memset(&fields, 0, sizeof(fields));
+//	//fields.opcode = 6;
+//	//fields.comb = 3;
+//
+////	fields.target_reg = 7;
+////fields.target_addr = 3;
+//fields.src_reg = 7;
+//	fields.src_addr = 0;
+//	fields.type = 0;
+//	fields.dbl = 0;
+////	mapword(w1, fields);
+//
+//	a = 7;
+//	a <<= 7;
+//	//mapword(w1, a);
+//	set_comb(w1, 3);
+//	print20LSBs(w1);
+//	
+//
+//
+//
+//}
 
 /* row level parsing activities for first pass */
 int parseRowFirst(const char *row){
@@ -208,4 +206,28 @@ int parseRowSecond(const char *row){
 }
 
 
+/*between first and second passes we increment the addresses of data
+labels by the value of IC to have them come right after the code segment */
+void updateDataSegemnt(){
+	incrementDataLabels(g_IC);
+	/* 	step #1 on p 28	*/
+	g_IC = 0;
+}
 
+void writeOutput(){
+
+}
+/*
+input file level cleanups and initalizations
+*/
+void cleanup(){
+	free(g_symbolTable);
+	free(g_entryTable);
+	free(g_externalTable);
+	g_IC = INIT_IC;					
+	g_DC = INIT_DC;				
+	g_symbolTableSize = 0;			
+	g_externalTableSize = 0;			
+	g_entryTableSize = 0;			
+	labelFlag = 0;			
+}
