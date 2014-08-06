@@ -38,20 +38,23 @@ int parseDynamicOperand(char *opr, int *o_label, int *o_index){
 		return reportError(msg, ERROR);
 	}
 
-	p = strchr(opr, '!');
+	/*advance p passed \0 */
+	p++;
+	opr = p;
+	p = strchr(opr = p, '!');
 	if (!p)
 		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing ! char\n", ERROR);
 	/*advance passed ! */
 	p++;
-
-	p1 = strchr(opr, '}');
+	opr = p;
+	p = strchr(opr, '}');
 	if (!p)
 		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing } char\n", ERROR);
 	
 	/*null terminate*/
-	*p1 = 0;
+	*p= 0;
 
-	if (sscanf(p, "%s", op)<1)
+	if (sscanf(opr, "%s", op)<1)
 		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing index label\n", ERROR);
 	(*o_index) = getSymbolOctall(op);
 	if (KNF == (*o_index)){
@@ -588,6 +591,11 @@ int encodeBinaryOpr(char *row, char *op){
 	set_opcode(&(g_programSegment[g_IC]), opcode);
 
 
+	/***********************************************/
+	/*      encode type                           */
+	/***********************************************/
+
+
 	/*advance pointer past slash */
 	row++; /*e.g.   1/0/1,0 x,r1  */
 	status = sscanf(row, "%c", &type);
@@ -601,6 +609,11 @@ int encodeBinaryOpr(char *row, char *op){
 	}
 
 
+
+
+	/***********************************************/
+	/*      encode comb                            */
+	/***********************************************/
 	
 	/* type 1 means that comb needs to be set */
 	if ('1' == type){
@@ -627,6 +640,12 @@ int encodeBinaryOpr(char *row, char *op){
 
 	}
 
+
+
+	/***********************************************/
+	/*      encode double                          */
+	/***********************************************/
+
 	/* advance to the dbl field */
 	row = strchr(row, ',');
 	if (!row)
@@ -650,6 +669,12 @@ int encodeBinaryOpr(char *row, char *op){
 	/*traverse white spaces*/
 	while ((*row == ' ') || (*row) == '\t')
 		row++;
+
+
+
+	/***********************************************/
+	/*      encode source operand                  */
+	/***********************************************/
 
 
 	if (sscanf(row, "%s", src_opr) < 1)
@@ -687,6 +712,13 @@ int encodeBinaryOpr(char *row, char *op){
 		reportError("Syntax Error: comma not found for second operand\n",ERROR);
 	
 	row++;
+
+
+
+	/***********************************************/
+	/*      encode destination operand             */
+	/***********************************************/
+
 	if (sscanf(row, "%s", dst_opr) < 1)
 		return reportError("Error, could not parse operands\n", ERROR);
 

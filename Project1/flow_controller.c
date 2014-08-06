@@ -25,7 +25,6 @@ static char labelFlag = 0;			/* module level label idenfification flag */
 int parseRowFirst(const char *);
 int parseRowSecond(const char *);
 void updateDataSegemnt();
-void writeOutput();
 void cleanup();
 
 int firstPass(char *inputFile){
@@ -57,6 +56,8 @@ int firstPass(char *inputFile){
 			return FATAL;
 		
 	}
+
+	return NORMAL;
 }
 
 int secondPass()
@@ -80,36 +81,44 @@ int secondPass()
 
 
 
-
+	return NORMAL;
 }
 
-//int dummytests(){
-//	Fields_t fields;
-//	Word_t w,w1;
-//	int a = pow(2.0,19.0)-1;
-//
-//	memset(&fields, 0, sizeof(fields));
-//	//fields.opcode = 6;
-//	//fields.comb = 3;
-//
-////	fields.target_reg = 7;
-////fields.target_addr = 3;
-//fields.src_reg = 7;
-//	fields.src_addr = 0;
-//	fields.type = 0;
-//	fields.dbl = 0;
-////	mapword(w1, fields);
-//
-//	a = 7;
-//	a <<= 7;
-//	//mapword(w1, a);
-//	set_comb(w1, 3);
-//	print20LSBs(w1);
-//	
-//
-//
-//
-//}
+int dummytests(){
+	Fields_t fields;
+	Word_t w,w1;
+	int a = pow(2.0,19.0)-1;
+	char p[10], *s = "a{ !b";
+
+		printf("status=%d\n", sscanf(s, "%s", p));
+		printf("p:  %s \n", p);
+
+
+
+
+	return 0;
+	memset(&fields, 0, sizeof(fields));
+	//fields.opcode = 6;
+	//fields.comb = 3;
+
+//	fields.target_reg = 7;
+//fields.target_addr = 3;
+fields.src_reg = 7;
+	fields.src_addr = 0;
+	fields.type = 0;
+	fields.dbl = 0;
+//	mapword(w1, fields);
+
+	a = 7;
+	a <<= 7;
+	//mapword(w1, a);
+	set_comb(w1, 3);
+	print20LSBs(w1);
+	
+
+
+
+}
 
 /* row level parsing activities for first pass */
 int parseRowFirst(const char *row){
@@ -214,8 +223,22 @@ void updateDataSegemnt(){
 	g_IC = 0;
 }
 
-void writeOutput(){
+int writeOutput(){
+	if (NORMAL != initOutput())
+		return FATAL;
 
+	if (NORMAL != flushObjFile())
+		return FATAL;
+
+	if (NORMAL != flushExtFile())
+		return FATAL;
+
+	if (NORMAL != flushEntFile())
+		return FATAL;
+
+	
+	closeFiles();
+	return NORMAL;
 }
 /*
 input file level cleanups and initalizations
@@ -230,4 +253,42 @@ void cleanup(){
 	g_externalTableSize = 0;			
 	g_entryTableSize = 0;			
 	labelFlag = 0;			
+}
+
+int flushObjFile(){
+	int i;
+	char row[MAX_ROW_SIZE];
+
+	/*write header*/
+	sprintf(row, "%d %d", g_IC, g_DC);
+	writeObjLine(row);
+
+	/*traverse code segment*/
+	for (i = 0; i < g_IC; i++){
+		int dec = mapwordtodecimal(&(g_programSegment[i]));
+		sprintf(row, "%d", getOctal(dec));
+		writeObjLine(row);
+	}
+
+
+	/*traverse data segment*/
+	for (i = 0; i < g_DC; i++){
+		int dec = mapwordtodecimal(&(g_dataSegment[i]));
+		sprintf(row, "%d", getOctal(dec));
+		writeObjLine(row);
+	}
+
+
+	return NORMAL;
+}
+
+
+int flushEntFile(){
+
+	return NORMAL;
+}
+
+int flushExtFile(){
+
+	return NORMAL;
 }

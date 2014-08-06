@@ -39,14 +39,42 @@ void initword(Word_t word){
 	word[1] = 0;
 	word[2] = 0;
 }
+/*convert 20 bits into an integer */
+int mapwordtodecimal(Word_t src){
 	
+	int target = 0;
+	unsigned int mask=1;
+	 
+
+	target = (src[2] & 0xf);
+	
+
+	/*if the 4th bit is on then negative number */
+	mask <<= 3;
+	if (target & mask) /*negative*/
+	{
+		 mask =0;
+		mask = ~mask; /*all 1s*/
+
+		mask <<= 4;
+		/*compliment all more significant bits than the first 4 with 1s*/
+		target |= mask;
+	}
+
+	target <<= 8;
+	
+	target |= (src[1] & 0xff);
+	target <<= 8;
+	target |= (src[0] & 0xff);
+	return target;
+}
 /* mapword maps an integer into the 20 LSBs of 24 bit word */
 void mapword(Word_t target, const int src)
 {
 	Word_t tmp;
 	tmp[0] = (src & 0xff);	  /* 8 LSBs of src are mapped to target[0] byte*/
 	tmp[1] = (src >> 8 & 0xff);  /* 8 next bits of src are mapped to target[1] byte*/
-	tmp[2] = (src >> 16 & 0x3f); /* 4 MSBs of src are mapped to target[2] 4 LSBs*/
+	tmp[2] = (src >> 16 & 0xf); /* 4 MSBs of src are mapped to target[2] 4 LSBs*/
 
 	target[0] |= tmp[0];
 	target[1] |= tmp[1];
