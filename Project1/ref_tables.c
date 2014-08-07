@@ -40,6 +40,15 @@ int  getDecOpcode(char *op);
 void incrementDataLabels(int);
 
 
+
+void dumpSymbolTable(){
+	int i;
+
+	for (i = 0; i < g_symbolTableSize; i++)
+		printf("%s <%d> <%d>\n", g_symbolTable[i].label, g_symbolTable[i].decimal, g_symbolTable[i].octal);
+
+	
+}
 /* increment all data labels by value of increment parameter*/
 void incrementDataLabels(int increment){
 	int i = 0;

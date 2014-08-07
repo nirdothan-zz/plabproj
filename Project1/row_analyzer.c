@@ -451,7 +451,7 @@ int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_addre
 		}
 
 		/* Increment IC by one, to account for the instruction word itself */
-		g_IC++;
+	
 
 
 
@@ -822,6 +822,7 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		if (KNF == address)
 			return reportError("Label Error!, label not found in table\n",ERROR);
 		mapword(&(g_programSegment[addWordIndex]), address);
+		//TODO remove print20LSBs(&(g_programSegment[addWordIndex]));
 
 		break;
 	case IMMEDIATE: /*example: mov #-1,r2 */

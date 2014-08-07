@@ -264,9 +264,11 @@ int flushObjFile(){
 	writeObjLine(row);
 
 	/*traverse code segment*/
-	for (i = 0; i < g_IC; i++){
+	for (i = 0; i < g_IC ; i++){
 		int dec = mapwordtodecimal(&(g_programSegment[i]));
-		sprintf(row, "%d", getOctal(dec));
+		char *bits = get20LSBs(&(g_programSegment[i]));
+		sprintf(row, "%d %s  -->  %d", getOctal(i + INIT_IC), bits, dec);
+		free(bits);
 		writeObjLine(row);
 	}
 
@@ -278,6 +280,7 @@ int flushObjFile(){
 		writeObjLine(row);
 	}
 
+	dumpSymbolTable();
 
 	return NORMAL;
 }

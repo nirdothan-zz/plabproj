@@ -23,6 +23,31 @@ void print20LSBs( const void *bitStream)
 	printf("\n");
 }
 
+
+char *get20LSBs(const void *bitStream)
+{
+
+	char *str = (char*)malloc(MAX_ROW_SIZE), *p = str;
+	char stops[] = { 1, 2, 3, 7, 9, 12, 14, 17 };
+	unsigned int i, j, *intform, mask = 1;
+	mask <<= (WORD_BITS - 1);
+
+	intform = (bitStream);
+	j = 0;
+	for (i = 0; i < WORD_BITS; i++)
+	{
+		sprintf(p++,"%c", (*intform & mask) == 0 ? '0' : '1');
+		mask >>= 1;
+		if (i == stops[j]){
+			sprintf(p++,"%c", '-');
+			j++;
+		}
+
+	}
+
+	return str;
+}
+
 void printHEX(const Word_t row)
 {
 	unsigned int  maskMSB = 0xf, mask = 0xff;
