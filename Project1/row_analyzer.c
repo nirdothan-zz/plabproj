@@ -7,6 +7,7 @@
 enum {SRC,DST};
 extern Word_t g_dataSegment[];
 extern Word_t g_programSegment[];
+extern int g_ICWordCount[];
 extern int g_DC;
 extern int g_IC;
 
@@ -24,6 +25,7 @@ int encodeNoParamOpr(char *, char*);
 /* get an operand in dynamic addressing method and return both its indexes*/
 int parseDynamicOperand(char *opr, int *o_label, int *o_index){
 	char *p,*p1, op[MAX_LABEL_SIZE+1];
+	int index;
 
 	p = strchr(opr, '{');
 	if (!p)
@@ -56,12 +58,15 @@ int parseDynamicOperand(char *opr, int *o_label, int *o_index){
 
 	if (sscanf(opr, "%s", op)<1)
 		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing index label\n", ERROR);
-	(*o_index) = getSymbolOctall(op);
-	if (KNF == (*o_index)){
+	index = getSymbolDecimal(op);
+	if (KNF == index){
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "Error! index label [%s] not founf in table\n", op);
 		return reportError(msg, ERROR);
 	}
+
+	/*trace back the real index of the instruction in the IC array*/
+	(*o_index) = g_ICWordCount[index];
 
 	return NORMAL;
 
@@ -209,7 +214,8 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 		if (!(*row))
 			return reportError("Error!, illegal syntax, could not find '/' after opcode \n", ERROR);
 
-
+		/*increment one word for base row */
+		g_ICWordCount[g_IC]++;
 
 		/* calculate the size of the instruction */
 		switch (getOpcodeGroup(instruction)){
@@ -228,8 +234,8 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 		}
 	}
 	
-		/* Increment IC by one, to account for the instruction word itself */
-		g_IC++;
+		/* Increment IC by the number of words that the instruction includes*/
+		g_IC += g_ICWordCount[g_IC];
 
 		return NORMAL;
 }
@@ -367,11 +373,12 @@ void incrementICforParam(char *param)
 	else if (strchr(param, '{'))
 	{
 		/*dynamic addressing has 2 additional words*/
-		g_IC += 2;
+
+		g_ICWordCount[g_IC]+=2;
 	}
 	/* direct or immediate addressing */
 	else {
-		g_IC++;
+		g_ICWordCount[g_IC] ++;
 	}
 
 }
@@ -450,11 +457,10 @@ int parseInstructionSecondPass(const char **row, int  *o_labelFlag, int *o_addre
 				}
 		}
 
-		/* Increment IC by one, to account for the instruction word itself */
-	
-
-
-
+		
+		
+		g_IC += g_ICWordCount[g_IC];
+		
 	return NORMAL;
 }
 
@@ -567,9 +573,6 @@ int encodeUnaryOpr(char *row, char *op){
 	if (NORMAL != status)
 		return status;
 
-	/*one for the current primary row + additional rows for additional words allocaled by
-	encodeOperand functiopn */
-	g_IC += (additionalWordsOffset + 1);
 
 	return NORMAL;
 }
@@ -700,7 +703,7 @@ int encodeBinaryOpr(char *row, char *op){
 	set_src_addr(&(g_programSegment[g_IC]), addressingMethod);
 	additionalWordsOffset = 0;
 	
-	status=encodeOperand(src_opr, addressingMethod, SRC, &additionalWordsOffset);
+	status = encodeOperand(src_opr, addressingMethod, SRC, &additionalWordsOffset);
 	if (NORMAL != status)
 		return status;
 
@@ -733,12 +736,10 @@ int encodeBinaryOpr(char *row, char *op){
 	}
 	/*encode the addressing method for target operand*/
 	set_target_addr(&(g_programSegment[g_IC]), addressingMethod);
-	status = encodeOperand(dst_opr, addressingMethod, DST, &additionalWordsOffset);
+	status = encodeOperand(dst_opr, addressingMethod, DST,&additionalWordsOffset);
 
 
-	/*one for the current primary row + additional rows for additional words allocaled by 
-	encodeOperand functiopn */
-	g_IC += (additionalWordsOffset + 1);
+
 
 	return status;
 
@@ -794,10 +795,11 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		status = parseDynamicOperand(operand, &label, &index);
 		if (NORMAL != status)
 			return status;
+		
 		(*o_additionalWords)++;
 		
 		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), label);
-
+		
 		(*o_additionalWords)++;
 
 		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), index);
@@ -816,8 +818,9 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		break;
 	case DIRECT:
 		/*increment aditional words used  */
+		
 		(*o_additionalWords)++;
-		addWordIndex = g_IC + *o_additionalWords;
+		addWordIndex = g_IC + (*o_additionalWords);
 		address = getSymbolOctall(operand);
 		if (KNF == address)
 			return reportError("Label Error!, label not found in table\n",ERROR);
@@ -829,8 +832,8 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 	
 		/*increment aditional words used  */
 		(*o_additionalWords)++;
-		addWordIndex=g_IC + *o_additionalWords;
-
+		addWordIndex = g_IC + (*o_additionalWords);
+		
 		/*advance passed the # */
 		operand++;
 

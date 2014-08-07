@@ -9,14 +9,15 @@ depicted in page 28 of the course booklet
 #include <stdlib.h>
 
 Word_t g_programSegment[MAX_PC];	/* global Program Segment */
+int g_ICWordCount[MAX_PC];			/* global counter of words per each base element in g_programSegment */
 Word_t g_dataSegment[MAX_PC];		/* global Data Segment */
 int g_IC = INIT_IC;					/* global instructions counter */
 int g_DC = INIT_DC;					/* global data counter */
 Symbol_t *g_symbolTable;			/* global symbol table */
 int g_symbolTableSize=0;			/* global symbol table current size */
 Symbol_t *g_externalTable;			/* global external table */
-int g_externalTableSize = 0;			/* global external table current size */
-Symbol_t *g_entryTable;			/* global entry table */
+int g_externalTableSize = 0;		/* global external table current size */
+Symbol_t *g_entryTable;				/* global entry table */
 int g_entryTableSize = 0;			/* global entry table current size */
 
 static char labelFlag = 0;			/* module level label idenfification flag */
@@ -185,7 +186,7 @@ int parseRowSecond(const char *row){
 	char label[MAX_LABEL_SIZE + 1];
 	int instructionFlag = 0;	 /*  instruction idenfification flag */
 
-
+	/*TODO remove*/
 	printf("row is <%s>\n", row);
 
 	if (isCommentOrEmpty(row))
@@ -220,7 +221,7 @@ labels by the value of IC to have them come right after the code segment */
 void updateDataSegemnt(){
 	incrementDataLabels(g_IC);
 	/* 	step #1 on p 28	*/
-	g_IC = 0;
+	g_IC = INIT_IC;
 }
 
 int writeOutput(){
@@ -255,33 +256,61 @@ void cleanup(){
 	labelFlag = 0;			
 }
 
+///* traslates between the sequential order of words in the program segment,
+//and their designated Effective address, in octal terms */
+//int getOctalEffectiveAddress(int index){
+//	return getOctal(getDecimalEffectiveAddress(index));
+//}
+///* traslates between the sequential order of words in the program segment, 
+//and their designated Effective address, in decimal terms */
+//int getDecimalEffectiveAddress(int index){
+//	return index + INIT_IC;
+//}
+//
+///* traslates between Effective address, in decimal terms, 
+//and the index of words in the program segment array,
+// */
+//int getICIndexByDecimalAddress(int address){
+//	return address - INIT_IC;
+//}
+
 int flushObjFile(){
-	int i;
+	int i,j;
 	char row[MAX_ROW_SIZE];
 
 	/*write header*/
-	sprintf(row, "%d %d", g_IC, g_DC);
+	sprintf(row, "%d %d", getOctal(g_IC - INIT_IC), getOctal(g_DC));
 	writeObjLine(row);
 
 	/*traverse code segment*/
-	for (i = 0; i < g_IC ; i++){
+	for (i = INIT_IC; i < g_IC ; i++){
 		int dec = mapwordtodecimal(&(g_programSegment[i]));
 		char *bits = get20LSBs(&(g_programSegment[i]));
-		sprintf(row, "%d %s  -->  %d", getOctal(i + INIT_IC), bits, dec);
-		free(bits);
+		sprintf(row, "%d %s  -->  %d", i, bits, getOctal(dec));
+		
 		writeObjLine(row);
+		free(bits);
 	}
+
 
 
 	/*traverse data segment*/
-	for (i = 0; i < g_DC; i++){
-		int dec = mapwordtodecimal(&(g_dataSegment[i]));
-		sprintf(row, "%d", getOctal(dec));
+	for (j = 0; j < g_DC; j++){
+		int dec = mapwordtodecimal(&(g_dataSegment[j]));
+		char *bits = get20LSBs(&(g_dataSegment[j]));
+		sprintf(row, "%d %s -->  %d", i++, bits, getOctal(dec));
+		
 		writeObjLine(row);
+		free(bits);
 	}
 
 	dumpSymbolTable();
-
+	/*TODO remove*/
+	{
+		int i;
+		for (i = 0; i < 20; i++)
+			printf("%d) %d\n", i + INIT_IC, g_ICWordCount[i + INIT_IC]);
+	}
 	return NORMAL;
 }
 
