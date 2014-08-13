@@ -284,9 +284,9 @@ int flushObjFile(){
 
 	/*traverse code segment*/
 	for (i = INIT_IC; i < g_IC ; i++){
-		int dec = mapwordtodecimal(&(g_programSegment[i]));
+		int oct = mapwordtodecimal(&(g_programSegment[i]));
 		char *bits = get20LSBs(&(g_programSegment[i]));
-		sprintf(row, "%d %s  -->  %d", i, bits, getOctal(dec));
+		sprintf(row, "%d %s  -->  %d", i, bits, oct);
 		
 		writeObjLine(row);
 		free(bits);

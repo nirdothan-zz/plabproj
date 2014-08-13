@@ -474,7 +474,7 @@ int encodeUnaryOpr(char *row, char *op){
 	char  type, dbl,src_opr[MAX_ROW_SIZE], *helper;
 	
 	int status, addressingMethod, additionalWordsOffset;
-	int opcode = getOctOpcode(op);
+	int opcode = getDecOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
@@ -587,7 +587,7 @@ int encodeBinaryOpr(char *row, char *op){
 	char type, dbl;
 	char src_opr[MAX_ROW_SIZE], dst_opr[MAX_ROW_SIZE], *helper;
 	int status, addressingMethod, additionalWordsOffset;
-	int opcode = getOctOpcode(op);
+	int opcode = getDecOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
@@ -749,7 +749,7 @@ int encodeBinaryOpr(char *row, char *op){
 /*encode an operation with no operands */
 int encodeNoParamOpr(char *row, char *op){
 	char tmp, status;
-	int opcode = getOctOpcode(op);
+	int opcode = getDecOpcode(op);
 	/* init the row*/
 	initword(&(g_programSegment[g_IC]));
 	/*set the opcode*/
@@ -825,6 +825,14 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		if (KNF == address)
 			return reportError("Label Error!, label not found in table\n",ERROR);
 		mapword(&(g_programSegment[addWordIndex]), address);
+	
+			
+		/*check if the symbol is external - if so insert it to the extrenal table */
+		if (EXT_LABEL ==  getSymbolType(operand)){
+			insertExternalLabel(operand, address);
+		}
+	
+
 		//TODO remove print20LSBs(&(g_programSegment[addWordIndex]));
 
 		break;
