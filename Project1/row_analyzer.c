@@ -8,6 +8,7 @@ enum {SRC,DST};
 extern Word_t g_dataSegment[];
 extern Word_t g_programSegment[];
 extern int g_ICWordCount[];
+extern int g_ICFlag[];
 extern int g_DC;
 extern int g_IC;
 
@@ -21,9 +22,10 @@ void incrementICforParam(char *);
 int encodeUnaryOpr(char *, char* );
 int encodeBinaryOpr(char *, char*);
 int encodeNoParamOpr(char *, char*);
+int parseDynamicOperand(char *, int *, int *, int );
 
 /* get an operand in dynamic addressing method and return both its indexes*/
-int parseDynamicOperand(char *opr, int *o_label, int *o_index){
+int parseDynamicOperand(char *opr, int *o_label, int *o_index, int additionalWords){
 	char *p,*p1, op[MAX_LABEL_SIZE+1];
 	int index;
 
@@ -39,6 +41,17 @@ int parseDynamicOperand(char *opr, int *o_label, int *o_index){
 		sprintf(msg, "Error! label [%s] not founf in table\n", op);
 		return reportError(msg, ERROR);
 	}
+
+
+	/*check if the symbol is external - if so insert it to the extrenal table */
+	if (EXT_LABEL == getSymbolType(op)){
+		insertExternalLabel(op, g_IC + additionalWords);
+		g_ICFlag[g_IC + additionalWords] = EXTERNAL_ADDRESS;
+	}
+	else {
+		g_ICFlag[g_IC + additionalWords] = RELATIVE_ADDRESS;
+	}
+
 
 	/*advance p passed \0 */
 	p++;
@@ -787,22 +800,27 @@ o_additionalWords indicates many additional words were populated
 */
 int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords){
 	int address, addWordIndex=0; 
+
+	/* base word is always absolute */
+	g_ICFlag[g_IC ] = ABSOLUTE_ADDRESS;
 	
 	switch (method){
 	case DYNAMIC_INDEX:
 		{
 		int status, label, index;
-		status = parseDynamicOperand(operand, &label, &index);
+
+		(*o_additionalWords)++;
+
+		status = parseDynamicOperand(operand, &label, &index, *o_additionalWords);
 		if (NORMAL != status)
 			return status;
 		
-		(*o_additionalWords)++;
-		
 		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), label);
-		
+
 		(*o_additionalWords)++;
 
 		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), index);
+		g_ICFlag[g_IC + (*o_additionalWords)] = ABSOLUTE_ADDRESS;
 
 		}
 		break;
@@ -829,7 +847,11 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 			
 		/*check if the symbol is external - if so insert it to the extrenal table */
 		if (EXT_LABEL ==  getSymbolType(operand)){
-			insertExternalLabel(operand, address);
+			insertExternalLabel(operand, addWordIndex);
+			g_ICFlag[addWordIndex] = EXTERNAL_ADDRESS;
+		}
+		else {
+			g_ICFlag[addWordIndex] = RELATIVE_ADDRESS;
 		}
 	
 

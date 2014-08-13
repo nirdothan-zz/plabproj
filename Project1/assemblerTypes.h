@@ -81,3 +81,6 @@ enum { NO_INST_FLAG = 0, DATA_INSTRUCTION_FLAG, STRING_INSTRUCTION_FLAG, EXTERN_
 
 /* addressing methods */
 enum { IMMEDIATE = 0, DIRECT=1, DYNAMIC_INDEX=2,  REGISTER=3};
+
+/* addressing flags for object file */
+enum{ ABSOLUTE_ADDRESS, RELATIVE_ADDRESS, EXTERNAL_ADDRESS};

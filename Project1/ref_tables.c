@@ -188,9 +188,9 @@ void trimSlash(char *dst, char *src){
 int insertExternalLabel(char *label, int label_dec_address)
 {
 	strcpy((g_externalTable[g_externalTableSize]).label, label);
-	(g_symbolTable[g_externalTableSize]).type = EXT_LABEL; /*not in use */
-	(g_symbolTable[g_externalTableSize]).decimal = label_dec_address;
-	(g_symbolTable[g_externalTableSize]).octal = getOctal(label_dec_address);
+	(g_externalTable[g_externalTableSize]).type = EXT_LABEL; /*not in use */
+	(g_externalTable[g_externalTableSize]).decimal = label_dec_address;
+	(g_externalTable[g_externalTableSize]).octal = getOctal(label_dec_address);
 	g_externalTableSize++;
 	return NORMAL;
 

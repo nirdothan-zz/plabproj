@@ -10,6 +10,7 @@ depicted in page 28 of the course booklet
 
 Word_t g_programSegment[MAX_PC];	/* global Program Segment */
 int g_ICWordCount[MAX_PC];			/* global counter of words per each base element in g_programSegment */
+int g_ICFlag[MAX_PC];				/* global flag per each element in g_programSegment */
 Word_t g_dataSegment[MAX_PC];		/* global Data Segment */
 int g_IC = INIT_IC;					/* global instructions counter */
 int g_DC = INIT_DC;					/* global data counter */
@@ -274,6 +275,23 @@ void cleanup(){
 //	return address - INIT_IC;
 //}
 
+
+/* translate flag values to ascii chars*/
+char flagToAscii(int flag){
+	switch (flag){
+	case EXTERNAL_ADDRESS:
+		return 'e';
+	case ABSOLUTE_ADDRESS:
+		return 'a';
+	case RELATIVE_ADDRESS:
+		return 'r';
+	default:
+		return 0;
+
+	}
+}
+
+
 int flushObjFile(){
 	int i,j;
 	char row[MAX_ROW_SIZE];
@@ -284,9 +302,12 @@ int flushObjFile(){
 
 	/*traverse code segment*/
 	for (i = INIT_IC; i < g_IC ; i++){
+		char flag = flagToAscii(g_ICFlag[i]);
 		int oct = mapwordtodecimal(&(g_programSegment[i]));
 		char *bits = get20LSBs(&(g_programSegment[i]));
-		sprintf(row, "%d %s  -->  %d", i, bits, oct);
+		if (!flag)
+			return reportError("ERROR! invalid addressing flag\n");
+		sprintf(row, "%d %s  -->  %.7d %c", getOctal(i), bits, oct, flag);
 		
 		writeObjLine(row);
 		free(bits);
@@ -298,7 +319,7 @@ int flushObjFile(){
 	for (j = 0; j < g_DC; j++){
 		int dec = mapwordtodecimal(&(g_dataSegment[j]));
 		char *bits = get20LSBs(&(g_dataSegment[j]));
-		sprintf(row, "%d %s -->  %d", i++, bits, getOctal(dec));
+		sprintf(row, "%d %s -->  %.7d", getOctal( i++), bits, getOctal(dec));
 		
 		writeObjLine(row);
 		free(bits);
@@ -317,10 +338,31 @@ int flushObjFile(){
 
 int flushEntFile(){
 
+	int i;
+	char row[MAX_ROW_SIZE];
+
+	/*traverse exytrenal table */
+	for (i = 0; i < g_entryTableSize; i++){
+		sprintf(row, "%s %d", g_entryTable[i].label, g_entryTable[i].octal);
+
+		writeEntLine(row);
+
+	}
+
 	return NORMAL;
 }
 
 int flushExtFile(){
+	int i;
+	char row[MAX_ROW_SIZE];
+
+	/*traverse exytrenal table */
+	for (i = 0; i < g_externalTableSize; i++){
+		sprintf(row, "%s %d", g_externalTable[i].label, g_externalTable[i].octal);
+
+		writeExtLine(row);
+		
+	}
 
 	return NORMAL;
 }
