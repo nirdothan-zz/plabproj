@@ -25,7 +25,7 @@ int encodeNoParamOpr(char *, char*);
 int parseDynamicOperand(char *, int *, int *, int );
 
 /* get an operand in dynamic addressing method and return both its indexes*/
-int parseDynamicOperand(char *opr, int *o_label, int *o_index, int additionalWords){
+int parseDynamicOperand(char *opr, int *o_decAddress, int *o_index, int additionalWords){
 	char *p,*p1, op[MAX_LABEL_SIZE+1];
 	int index;
 
@@ -35,8 +35,8 @@ int parseDynamicOperand(char *opr, int *o_label, int *o_index, int additionalWor
 	*p = 0;
 	if (sscanf(opr,"%s",op) < 1)
 		return reportError("Syntax error: invalid syntax of dynamic addressing operand - missing label\n", ERROR);
-	(*o_label) = getSymbolOctall(op);
-	if (KNF == (*o_label)){
+	(*o_decAddress) = getSymbolDecimal(op);
+	if (KNF == (*o_decAddress)){
 		char msg[MSG_MAX_SIZE];
 		sprintf(msg, "Error! label [%s] not founf in table\n", op);
 		return reportError(msg, ERROR);
@@ -307,7 +307,8 @@ int storeString(char *data){
 	while (data[i]){
 			/*map each chars ascii value to a separate row in the data image*/
 			mapword(&(g_dataSegment[g_DC++]), data[i++]);
-			print20LSBs(&(g_dataSegment[g_DC-1]));
+			//TODO remove
+			//print20LSBs(&(g_dataSegment[g_DC-1]));
 			
 		}
 
@@ -579,7 +580,7 @@ int encodeUnaryOpr(char *row, char *op){
 	}
 
 	/*encode the addressing method for source operand*/
-	set_src_addr(&(g_programSegment[g_IC]), addressingMethod);
+	set_target_addr(&(g_programSegment[g_IC]), addressingMethod);
 	additionalWordsOffset = 0;
 
 	status = encodeOperand(src_opr, addressingMethod, DST, &additionalWordsOffset);
@@ -807,15 +808,15 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 	switch (method){
 	case DYNAMIC_INDEX:
 		{
-		int status, label, index;
+		int status, decAddress, index;
 
 		(*o_additionalWords)++;
 
-		status = parseDynamicOperand(operand, &label, &index, *o_additionalWords);
+		status = parseDynamicOperand(operand, &decAddress, &index, *o_additionalWords);
 		if (NORMAL != status)
 			return status;
 		
-		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), label);
+		mapword(&(g_programSegment[g_IC + (*o_additionalWords)]), decAddress);
 
 		(*o_additionalWords)++;
 
@@ -839,7 +840,7 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		
 		(*o_additionalWords)++;
 		addWordIndex = g_IC + (*o_additionalWords);
-		address = getSymbolOctall(operand);
+		address = getSymbolDecimal(operand);
 		if (KNF == address)
 			return reportError("Label Error!, label not found in table\n",ERROR);
 		mapword(&(g_programSegment[addWordIndex]), address);
@@ -872,7 +873,7 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 
 		
 		mapword(&(g_programSegment[addWordIndex]), address);
-		
+		g_ICFlag[addWordIndex] = ABSOLUTE_ADDRESS;
 
 		break;
 	default:

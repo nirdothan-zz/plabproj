@@ -129,7 +129,8 @@ int parseRowFirst(const char *row){
 	int instructionFlag = 0;	 /*  instruction idenfification flag */
 
 
-	printf("row is <%s>\n", row);
+	//TODO remove
+	//printf("row is <%s>\n", row);
 
 	if (isCommentOrEmpty(row))
 		return NORMAL;
@@ -188,7 +189,7 @@ int parseRowSecond(const char *row){
 	int instructionFlag = 0;	 /*  instruction idenfification flag */
 
 	/*TODO remove*/
-	printf("row is <%s>\n", row);
+	//printf("row is <%s>\n", row);
 
 	if (isCommentOrEmpty(row))
 		return NORMAL;
@@ -255,6 +256,19 @@ void cleanup(){
 	g_externalTableSize = 0;			
 	g_entryTableSize = 0;			
 	labelFlag = 0;			
+
+	memset(g_programSegment, 0, MAX_PC);
+	memset(g_ICFlag, 0, MAX_PC);
+	memset(g_dataSegment, 0, MAX_PC*sizeof(Word_t));
+	memset(g_ICWordCount, 0, MAX_PC);
+
+
+
+
+
+
+
+
 }
 
 ///* traslates between the sequential order of words in the program segment,
@@ -303,11 +317,11 @@ int flushObjFile(){
 	/*traverse code segment*/
 	for (i = INIT_IC; i < g_IC ; i++){
 		char flag = flagToAscii(g_ICFlag[i]);
-		int oct = mapwordtodecimal(&(g_programSegment[i]));
+		int dec = mapwordtodecimal(&(g_programSegment[i]));
 		char *bits = get20LSBs(&(g_programSegment[i]));
 		if (!flag)
 			return reportError("ERROR! invalid addressing flag\n");
-		sprintf(row, "%d %s  -->  %.7d %c", getOctal(i), bits, oct, flag);
+		sprintf(row, "%d %s  -->  %.7d %c", getOctal(i), bits, getOctal(dec), flag);
 		
 		writeObjLine(row);
 		free(bits);
@@ -329,8 +343,8 @@ int flushObjFile(){
 	/*TODO remove*/
 	{
 		int i;
-		for (i = 0; i < 20; i++)
-			printf("%d) %d\n", i + INIT_IC, g_ICWordCount[i + INIT_IC]);
+		for (i = 0; i < 20; i++);
+		//	printf("%d) %d\n", i + INIT_IC, g_ICWordCount[i + INIT_IC]);
 	}
 	return NORMAL;
 }

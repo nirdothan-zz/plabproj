@@ -160,7 +160,8 @@ int  getOpcodeGroup(char *op){
 
 	trimSlash(trimmedOp,op);
 
-	printf("checking opr <%s>\n", trimmedOp);
+	//TODO remove
+	//printf("checking opr <%s>\n", trimmedOp);
 	
 	FINDINREF(opcodes, Opcodes_t, opcode, trimmedOp, group, res);
 	return res;
