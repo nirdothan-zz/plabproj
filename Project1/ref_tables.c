@@ -19,6 +19,8 @@ extern int g_entryTableSize;
 	RESULT_VAL: the value that is being searched for or KNF_VAL if not found
 	
 */
+/*  macro commented out becuase of compliation issues
+
 #define FINDINREF(TABLE, TYPE, KEY_FIELD, KEY_VAL, RESULT_FIELD, RESULT_VAL)\
 {\
 	int i = 0;\
@@ -33,6 +35,8 @@ extern int g_entryTableSize;
 		i++; \
 	}\
 }								
+
+*/
 
 void trimSlash(char*, char*);
 int  getOpcodeGroup(char*);
@@ -127,21 +131,56 @@ int getSymbolDecimalOfType(char *symbol, int sym_type){
 }
 
 int isSrcAddressingMethodValid(char *op, int method){
-	int *res;
-	FINDINREF(opcodes, Opcodes_t, opcode, op, sourceAddressingMethods, res)	
-	return res[method];
+
+	int res;
+	int i = 0; 
+	res = KNF; 
+	while (i < (sizeof(opcodes) / sizeof(Opcodes_t)))
+	{ 
+		if (!strcmp(opcodes[i].opcode, op))
+		{
+			res = opcodes[i].sourceAddressingMethods[method];
+			break;
+		}
+		i++; 
+	}
+									
+	return res;
 }
 
 int isDstAddressingMethodValid(char *op, int method){
-	int *res;
-	FINDINREF(opcodes, Opcodes_t, opcode, op, targetAddressingMethods, res)
-	return res[method];
+	int res;
+	int i = 0;
+	res = KNF;
+	while (i < (sizeof(opcodes) / sizeof(Opcodes_t)))
+	{
+		if (!strcmp(opcodes[i].opcode, op))
+		{
+			res = opcodes[i].targetAddressingMethods[method];
+			break;
+		}
+		i++;
+	}
+
+	return res;
 }
 
 /*returns the octal mapping of a given opcode*/
 int  getOctOpcode(char *op){
 	int res;
-	FINDINREF(opcodes, Opcodes_t, opcode, op, octal, res)
+
+	int i = 0;
+	res = KNF;
+	while (i < (sizeof(opcodes) / sizeof(Opcodes_t)))
+	{
+		if (!strcmp(opcodes[i].opcode, op))
+		{
+			res = opcodes[i].octal;
+			break;
+		}
+		i++;
+	}
+
 	return res;
 }
 
@@ -149,7 +188,19 @@ int  getOctOpcode(char *op){
 /*returns the decimal mapping of a given opcode*/
 int  getDecOpcode(char *op){
 	int res;
-	FINDINREF(opcodes, Opcodes_t, opcode, op, decimal, res);
+
+	int i = 0;
+	res = KNF;
+	while (i < (sizeof(opcodes) / sizeof(Opcodes_t)))
+	{
+		if (!strcmp(opcodes[i].opcode, op))
+		{
+			res = opcodes[i].decimal;
+			break;
+		}
+		i++;
+	}
+
 	return res;
 }
 
@@ -157,13 +208,21 @@ int  getDecOpcode(char *op){
 int  getOpcodeGroup(char *op){
 	int res, trimsize;
 	char trimmedOp[MAX_ROW_SIZE];
-
+	int i = 0;
 	trimSlash(trimmedOp,op);
 
-	//TODO remove
-	//printf("checking opr <%s>\n", trimmedOp);
-	
-	FINDINREF(opcodes, Opcodes_t, opcode, trimmedOp, group, res);
+
+	res = KNF;
+	while (i < (sizeof(opcodes) / sizeof(Opcodes_t)))
+	{
+		if (!strcmp(opcodes[i].opcode, trimmedOp))
+		{
+			res = opcodes[i].group;
+			break;
+		}
+		i++;
+	}
+
 	return res;
 }
 
