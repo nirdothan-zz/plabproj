@@ -254,7 +254,7 @@ int parseInstruction(const char **row, int  *o_labelFlag, int *o_address){
 }
 
 /* parse the ".data" instruction and stores its values in the data image */
-int storeData(char *data){
+int storeData(const char *data){
 	int integer;
 	/* sscanf format needs a variable because we add ',' after the first time */
 	char format[] = " %d";
@@ -282,7 +282,7 @@ int storeData(char *data){
 }
 
 /* parse the ".string" instruction and stores its chars in the data image */
-int storeString(char *data){
+int storeString(const char *data){
 	char *string;
 	int i=0;
 
