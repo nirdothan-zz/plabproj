@@ -307,8 +307,7 @@ int storeString(char *data){
 	while (data[i]){
 			/*map each chars ascii value to a separate row in the data image*/
 			mapword(&(g_dataSegment[g_DC++]), data[i++]);
-			//TODO remove
-			//print20LSBs(&(g_dataSegment[g_DC-1]));
+			
 			
 		}
 
@@ -856,7 +855,7 @@ int encodeOperand(char *operand, int method, int srcdst, int *o_additionalWords)
 		}
 	
 
-		//TODO remove print20LSBs(&(g_programSegment[addWordIndex]));
+		
 
 		break;
 	case IMMEDIATE: /*example: mov #-1,r2 */

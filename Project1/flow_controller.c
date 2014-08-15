@@ -86,41 +86,7 @@ int secondPass()
 	return NORMAL;
 }
 
-int dummytests(){
-	Fields_t fields;
-	Word_t w,w1;
-	int a = pow(2.0,19.0)-1;
-	char p[10], *s = "a{ !b";
 
-		printf("status=%d\n", sscanf(s, "%s", p));
-		printf("p:  %s \n", p);
-
-
-
-
-	return 0;
-	memset(&fields, 0, sizeof(fields));
-	//fields.opcode = 6;
-	//fields.comb = 3;
-
-//	fields.target_reg = 7;
-//fields.target_addr = 3;
-fields.src_reg = 7;
-	fields.src_addr = 0;
-	fields.type = 0;
-	fields.dbl = 0;
-//	mapword(w1, fields);
-
-	a = 7;
-	a <<= 7;
-	//mapword(w1, a);
-	set_comb(w1, 3);
-	print20LSBs(w1);
-	
-
-
-
-}
 
 /* row level parsing activities for first pass */
 int parseRowFirst(const char *row){
@@ -129,8 +95,8 @@ int parseRowFirst(const char *row){
 	int instructionFlag = 0;	 /*  instruction idenfification flag */
 
 
-	//TODO remove
-	//printf("row is <%s>\n", row);
+	/* TODO remove 
+	printf("row is <%s>\n", row); */
 
 	if (isCommentOrEmpty(row))
 		return NORMAL;
@@ -188,9 +154,9 @@ int parseRowSecond(const char *row){
 	char label[MAX_LABEL_SIZE + 1];
 	int instructionFlag = 0;	 /*  instruction idenfification flag */
 
-	/*TODO remove*/
-	//printf("row is <%s>\n", row);
-
+	/*TODO remove
+	printf("row is <%s>\n", row);
+	*/
 	if (isCommentOrEmpty(row))
 		return NORMAL;
 
@@ -271,23 +237,7 @@ void cleanup(){
 
 }
 
-///* traslates between the sequential order of words in the program segment,
-//and their designated Effective address, in octal terms */
-//int getOctalEffectiveAddress(int index){
-//	return getOctal(getDecimalEffectiveAddress(index));
-//}
-///* traslates between the sequential order of words in the program segment, 
-//and their designated Effective address, in decimal terms */
-//int getDecimalEffectiveAddress(int index){
-//	return index + INIT_IC;
-//}
-//
-///* traslates between Effective address, in decimal terms, 
-//and the index of words in the program segment array,
-// */
-//int getICIndexByDecimalAddress(int address){
-//	return address - INIT_IC;
-//}
+
 
 
 /* translate flag values to ascii chars*/
@@ -340,12 +290,7 @@ int flushObjFile(){
 	}
 
 	dumpSymbolTable();
-	/*TODO remove*/
-	{
-		int i;
-		for (i = 0; i < 20; i++);
-		//	printf("%d) %d\n", i + INIT_IC, g_ICWordCount[i + INIT_IC]);
-	}
+	
 	return NORMAL;
 }
 
