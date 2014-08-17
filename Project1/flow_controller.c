@@ -284,7 +284,7 @@ int flushObjFile(){
 		/*free(bits);*/
 	}
 
-	dumpSymbolTable();
+
 	
 	return NORMAL;
 }
