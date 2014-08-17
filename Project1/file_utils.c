@@ -24,6 +24,8 @@ int initOutput(){
 		return reportError(msg, FATAL);
 	}
 
+
+printf("fopen file [%s]\n",ofile);
 	exfd = fopen(strcat(exfile, EXT_SUFFIX), "w+");
 	if (!exfd)
 	{
@@ -32,6 +34,7 @@ int initOutput(){
 		return reportError(msg, FATAL);
 	}
 
+printf("fopen file [%s]\n",exfile);
 	enfd = fopen(strcat(enfile, ENT_SUFFIX), "w+");
 	if (!enfd)
 	{
@@ -40,6 +43,7 @@ int initOutput(){
 		return reportError(msg, FATAL);
 	}
 
+printf("fopen file [%s]\n",enfile);
 	return NORMAL;
 }
 
@@ -112,8 +116,9 @@ int writeLine(char *line, FILE  *fileDesc){
 	FILE *fd;
 
 
-	if (fputs(line, fileDesc))
-		return reportError("Fatal! Unable to write to output file\n", FATAL);
+	if (EOF==fputs(line, fileDesc))
+		return reportError("Fatal! Unable to write to output file", FATAL);
+
 	fputs("\n", fileDesc);
 	return NORMAL;
 }
