@@ -2,6 +2,13 @@
 #include "assemblerTypes.h"
 #include <string.h>
 
+/*
+main program module
+responsible for traversing input files and feeding them to the processing modules
+*/
+
+
+/*run the main flow - per input file*/
 int processSingleFile(char *inputFile)
 {
 	int status, outputFlag=1;
@@ -20,23 +27,17 @@ int processSingleFile(char *inputFile)
 	cleanup();
 }
 
+/* entry point into the program*/
 void main(int argc, char **argv)
 {
 	int i;
 	
+	/* inialize the error handler with program name */
 	initPrgram("assembler");
 
-
-
-
-
-	
-
-
+	/* traverse input files*/
 	for (i = 1; i < argc; i++){
-		/* TODO remove */
-		/* ("argv[%d]=%s\n", i,argv[i]);  */
-
+	
 		processSingleFile(argv[i]);
 	}
 	

@@ -45,7 +45,7 @@ void incrementDataLabels(int);
 int getSymbolType(char*);
 int getEntryLabelOctall(char*);
 
-
+/* symbol table printing utility */
 void dumpSymbolTable(){
 	int i;
 
@@ -70,6 +70,7 @@ void incrementDataLabels(int increment){
 	}
 }
 
+/* get the decimal address of a symbol */
 int getSymbolDecimal(char *symbol){
 	int i = 0; 
 		
@@ -83,6 +84,8 @@ int getSymbolDecimal(char *symbol){
 }
 
 
+
+/* get the octal address of a symbol */
 int getSymbolOctall(char *symbol){
 	int i = 0;
 
@@ -95,6 +98,8 @@ int getSymbolOctall(char *symbol){
 	return KNF;
 }
 
+
+/* get the ocatal address of an entry symbol */
 int getEntryLabelOctall(char *symbol){
 	int i = 0;
 
@@ -107,6 +112,8 @@ int getEntryLabelOctall(char *symbol){
 	return KNF;
 }
 
+
+/* get the type  address of a symbol */
 int getSymbolType(char *symbol){
 	int i = 0;
 
@@ -118,6 +125,8 @@ int getSymbolType(char *symbol){
 	}
 	return KNF;
 }
+
+/* not in use */
 int getSymbolDecimalOfType(char *symbol, int sym_type){
 	int i = 0;
 
@@ -130,6 +139,9 @@ int getSymbolDecimalOfType(char *symbol, int sym_type){
 	return KNF;
 }
 
+
+/* for given opcode and addressing method - checks if the source addressing method is valid 
+for that opcode. 1-indicates valid whereas 0 indicates invalid */
 int isSrcAddressingMethodValid(char *op, int method){
 
 	int res;
@@ -148,6 +160,9 @@ int isSrcAddressingMethodValid(char *op, int method){
 	return res;
 }
 
+
+/* for given opcode and addressing method - checks if the destination addressing method is valid
+for that opcode. 1-indicates valid whereas 0 indicates invalid */
 int isDstAddressingMethodValid(char *op, int method){
 	int res;
 	int i = 0;

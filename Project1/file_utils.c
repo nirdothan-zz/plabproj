@@ -25,7 +25,7 @@ int initOutput(){
 	}
 
 
-printf("fopen file [%s]\n",ofile);
+
 	exfd = fopen(strcat(exfile, EXT_SUFFIX), "w+");
 	if (!exfd)
 	{
@@ -34,7 +34,6 @@ printf("fopen file [%s]\n",ofile);
 		return reportError(msg, FATAL);
 	}
 
-printf("fopen file [%s]\n",exfile);
 	enfd = fopen(strcat(enfile, ENT_SUFFIX), "w+");
 	if (!enfd)
 	{
@@ -43,7 +42,6 @@ printf("fopen file [%s]\n",exfile);
 		return reportError(msg, FATAL);
 	}
 
-printf("fopen file [%s]\n",enfile);
 	return NORMAL;
 }
 
@@ -99,18 +97,25 @@ void rewindInputFile(){
 	rewind(ifd);
 }
 
+/* write line to ob file */
 int writeObjLine(char *line){
 	return writeLine(line, ofd);
 
 }
+
+/* write line to ext file */
 int writeExtLine(char *line){
 	return writeLine(line, exfd);
 
 }
+
+/* write line to entity file */
 int writeEntLine(char *line){
 	return writeLine(line, enfd);
 
 }
+
+/* generic write line to file descriptor utility */
 int writeLine(char *line, FILE  *fileDesc){
 	int status;
 	FILE *fd;
@@ -123,6 +128,7 @@ int writeLine(char *line, FILE  *fileDesc){
 	return NORMAL;
 }
 
+/* close all files */
 void closeFiles(){
 	fclose(ifd);
 	fclose(ofd);

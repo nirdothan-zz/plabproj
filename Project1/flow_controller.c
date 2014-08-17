@@ -20,7 +20,6 @@ Symbol_t *g_externalTable;			/* global external table */
 int g_externalTableSize = 0;		/* global external table current size */
 Symbol_t *g_entryTable;				/* global entry table */
 int g_entryTableSize = 0;			/* global entry table current size */
-
 static char labelFlag = 0;			/* module level label idenfification flag */
 
 
@@ -67,8 +66,6 @@ int secondPass()
 	int status;
 	char *row = NULL;
 
-	
-
 
 	rewindInputFile();
 
@@ -80,7 +77,6 @@ int secondPass()
 			return FATAL;
 
 	}
-
 
 
 	return NORMAL;
@@ -192,6 +188,7 @@ void updateDataSegemnt(){
 	g_IC = INIT_IC;
 }
 
+/* flush all buffers to output files*/
 int writeOutput(){
 	if (NORMAL != initOutput())
 		return FATAL;
@@ -229,12 +226,6 @@ void cleanup(){
 	memset(g_ICWordCount, 0, MAX_PC);
 
 
-
-
-
-
-
-
 }
 
 
@@ -255,7 +246,7 @@ char flagToAscii(int flag){
 	}
 }
 
-
+/* flush IC and DC buffers to obj file */
 int flushObjFile(){
 	int i,j;
 	char row[MAX_ROW_SIZE];
@@ -268,13 +259,15 @@ int flushObjFile(){
 	for (i = INIT_IC; i < g_IC ; i++){
 		char flag = flagToAscii(g_ICFlag[i]);
 		int dec = mapwordtodecimal(&(g_programSegment[i]));
-		char *bits = get20LSBs(&(g_programSegment[i]));
+
+		/* for debugging bits */
+		/* char *bits = get20LSBs(&(g_programSegment[i])); */
 		if (!flag)
 			return reportError("ERROR! invalid addressing flag\n");
-		sprintf(row, "%d %s  -->  %.7d %c", getOctal(i), bits, getOctal(dec), flag);
+		sprintf(row, "%d %.7d %c", getOctal(i),  getOctal(dec), flag);
 		
 		writeObjLine(row);
-		free(bits);
+		/*free(bits);*/
 	}
 
 
@@ -282,11 +275,13 @@ int flushObjFile(){
 	/*traverse data segment*/
 	for (j = 0; j < g_DC; j++){
 		int dec = mapwordtodecimal(&(g_dataSegment[j]));
-		char *bits = get20LSBs(&(g_dataSegment[j]));
-		sprintf(row, "%d %s -->  %.7d", getOctal( i++), bits, getOctal(dec));
+
+		/* for debugging bits */
+		/*char *bits = get20LSBs(&(g_dataSegment[j]));*/
+		sprintf(row, "%d %.7d", getOctal( i++), getOctal(dec));
 		
 		writeObjLine(row);
-		free(bits);
+		/*free(bits);*/
 	}
 
 	dumpSymbolTable();
@@ -294,7 +289,7 @@ int flushObjFile(){
 	return NORMAL;
 }
 
-
+/* flush entry table to entry file */
 int flushEntFile(){
 
 	int i;
@@ -311,6 +306,8 @@ int flushEntFile(){
 	return NORMAL;
 }
 
+
+/* flush external table to external file */
 int flushExtFile(){
 	int i;
 	char row[MAX_ROW_SIZE];
