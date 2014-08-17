@@ -1,4 +1,17 @@
 #include "assemblerTypes.h"
+/*
+
+bitwise operations module mainly for manipulating Word_t type
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+|	19	18	|	17	|	16		|	15	14	13	12	|	11	10	|	9	8	7	|	6	5	|	4	3	2	|	1	0	|
+|			|	dbl	|	type	|		opcode		|src addr	|	src reg		|dest addr	|	dest reg	|	comb	|
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+*/
+
+/* print 20 LSBs from a bit stream to stdout in binary format */
 
 void print20LSBs( const void *bitStream)
 {
@@ -23,7 +36,9 @@ void print20LSBs( const void *bitStream)
 	printf("\n");
 }
 
-
+/* return a string of 20 LSBs from a bit streamt in binary format 
+user must free memory!
+*/
 char *get20LSBs(const void *bitStream)
 {
 

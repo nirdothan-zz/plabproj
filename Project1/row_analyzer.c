@@ -493,9 +493,19 @@ int encodeUnaryOpr(char *row, char *op){
 	/*set the opcode*/
 	set_opcode(&(g_programSegment[g_IC]), opcode);
 
+	/***********************************************/
+	/*      encode type                           */
+	/***********************************************/
+	row = strchr(row, '/');
+	if (!row)
+		return reportError("Error - slash not found\n", ERROR);
+
 
 	/*advance pointer past slash */
 	row++; /*e.g.   1/0/1,0 x,r1  */
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')		row++;
+
 	status = sscanf(row, "%c", &type);
 
 	if ('0' == type || '1' == type || status<1)
@@ -507,6 +517,9 @@ int encodeUnaryOpr(char *row, char *op){
 	}
 
 
+	/***********************************************/
+	/*      encode comb                            */
+	/***********************************************/
 
 	/* type 1 means that comb needs to be set */
 	if ('1' == type){
@@ -517,6 +530,9 @@ int encodeUnaryOpr(char *row, char *op){
 
 		/*advance pointer passed slash*/
 		row++; /*now:   0,0 x,r1   */
+		/*traverse white spaces*/
+		while ((*row == ' ') || (*row) == '\t')		row++;
+
 		status = sscanf(row, "%c", &combL );
 		if (('0' != combL && '1' != combL) ||  status < 1)
 		{
@@ -533,12 +549,18 @@ int encodeUnaryOpr(char *row, char *op){
 
 	}
 
+
+	/***********************************************/
+	/*      encode double                          */
+	/***********************************************/
+
 	/* advance to the dbl field */
 	row = strchr(row, ',');
 	if (!row)
 		return reportError("Error - comma not found\n", ERROR);
 
-
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')	row++;
 
 	/*advance pointer passed comma to double filed*/
 	row++; /*e.g.   0 x,r1  */
@@ -552,11 +574,16 @@ int encodeUnaryOpr(char *row, char *op){
 	}
 
 
+
+	/***********************************************/
+	/*      encode target operand                  */
+	/***********************************************/
+
+
 	/*advance pointer passed the double filed to the white space before first operand*/
 	row++; /*e.g.    x,r1  */
 	/*traverse white spaces*/
-	while ((*row == ' ') || (*row) == '\t')
-		row++;
+	while ((*row == ' ') || (*row) == '\t')		row++;
 
 
 	if (sscanf(row, "%s", src_opr) < 1)
@@ -610,10 +637,16 @@ int encodeBinaryOpr(char *row, char *op){
 	/***********************************************/
 	/*      encode type                           */
 	/***********************************************/
-
+	row = strchr(row, '/');
+	if (!row)
+		return reportError("Error - slash not found\n", ERROR);
 
 	/*advance pointer past slash */
 	row++; /*e.g.   1/0/1,0 x,r1  */
+
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t') row++;
+
 	status = sscanf(row, "%c", &type);
 
 	if ('0' == type || '1' == type || status<1)
@@ -640,6 +673,11 @@ int encodeBinaryOpr(char *row, char *op){
 
 		/*advance pointer passed slash*/
 		row++; /*now:   0/1,0 x,r1   */
+
+		/*traverse white spaces*/
+		while ((*row == ' ') || (*row) == '\t') row++;
+
+		/* get comb values -- note that we do not allow white spaces here!!! it must be c/c */
 		status = sscanf(row, "%c/%c", &combL, &combR);
 		if (('0' != combL && '1' != combL) || ('0' != combR && '1' != combR) || status < 2)
 		{
@@ -670,6 +708,14 @@ int encodeBinaryOpr(char *row, char *op){
 
 	/*advance pointer passed comma to double filed*/
 	row++; /*e.g.   0 x,r1  */
+
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')
+		row++;
+
+	/*traverse white spaces*/
+	while ((*row == ' ') || (*row) == '\t')		row++;
+
 	status = sscanf(row, "%c", &dbl);
 	if ('0' == dbl || '1' == dbl || status<1)
 		set_double(&(g_programSegment[g_IC]), BINVAL(dbl));
@@ -683,8 +729,7 @@ int encodeBinaryOpr(char *row, char *op){
 	/*advance pointer passed the double filed to the white space before first operand*/
 	row++; /*e.g.    x,r1  */
 	/*traverse white spaces*/
-	while ((*row == ' ') || (*row) == '\t')
-		row++;
+	while ((*row == ' ') || (*row) == '\t') row++;
 
 
 
@@ -777,6 +822,7 @@ int encodeNoParamOpr(char *row, char *op){
 
 int getAddressingMethod(char *operand){
 
+	/*  bug - missed operands with white spaces 
 	sscanf(operand, "s", operand);
 
 	if (operand[0] == '#')
@@ -787,6 +833,20 @@ int getAddressingMethod(char *operand){
 
 	if (strchr(operand, '{'))
 		return DYNAMIC_INDEX;
+		*/
+
+	if (strchr(operand, '{'))
+		return DYNAMIC_INDEX;
+
+	
+	/* trim leading white spaces  */
+	sscanf(operand, "s", operand);
+
+	if (operand[0] == 'r' && operand[1] >= '0' && operand[1] <= '7')
+		return REGISTER;
+
+	if (operand[0] == '#')
+		return IMMEDIATE;
 
 	return DIRECT;
 
