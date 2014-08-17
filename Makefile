@@ -1,7 +1,5 @@
-complex: main.o bitwise_utils.o  error_handler.o  file_utils.o  flow_controller.o ref_tables.o  row_analyzer.o
+assembler: main.o bitwise_utils.o  error_handler.o  file_utils.o  flow_controller.o ref_tables.o  row_analyzer.o
 	gcc -g  main.o bitwise_utils.o  error_handler.o  file_utils.o  flow_controller.o ref_tables.o  row_analyzer.o -lm -o assembler
-
-
 
 bitwise_utils.o: bitwise_utils.c
 	gcc -Wall -ansi -c bitwise_utils.c -o bitwise_utils.o
